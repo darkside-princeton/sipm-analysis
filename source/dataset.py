@@ -1,10 +1,9 @@
 import datetime
 import glob
-import time
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
-import Waveform as Wvf
+import waveform as wvf
 
 class Dataset: 
     def __init__(self,  Path, ShowPlots=True, Selection='*', Pol=1, NumChannels=2):
@@ -28,12 +27,10 @@ class Dataset:
         self.InverseCut = np.where(self.Ch[0].BaseStd > self.NoiseCut)
 
     def InitializeChannels(self, NumChannels=2, Pol=1):
-        return [Wvf.Waveform(ID=ii, Pol=(-1)**ii*-1*Pol) for ii in range(1,NumChannels+1)]
+        return [wvf.Waveform(ID=ii, Pol=(-1)**ii*-1*Pol) for ii in range(1,NumChannels+1)]
 
     def ImportDataFromHDF5(self, File, channels, var=['trig','timestamp']):
         f = h5py.File(File, 'r')  
-        # print(" | Filename...", File)
-        Keys = list(f.keys())
         for ch in channels:
             ch.Time = np.array(f.get('Time')).flatten() * ch.TScale
             if 'trig' in var:
@@ -41,11 +38,8 @@ class Dataset:
             Group = f.get(ch.ChName)
             GroupKeys = Group.keys()
             ch.Files.append(len(GroupKeys))
-            # print(" | Number of files in ch%d...\t %d/%d" % (ch.ID, ch.Files[-1], np.sum(ch.Files)))
             for key in GroupKeys:
                 ch.Amp.append(np.array(Group.get(key)).flatten() * ch.VScale * ch.Pol)
-                # print(f.attrs['Date'])
-                # print(Group.get(key).attrs["TimeStamp"].decode('utf-8'))
                 if "timestamp" in var:
                     ch.TimeStamp.append(datetime.datetime.strptime(Group.get(key).attrs["TimeStamp"].decode('utf-8'), '%Y%m%d%H%M%S'))
         f.close()

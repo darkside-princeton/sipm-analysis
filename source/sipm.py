@@ -6,9 +6,9 @@ from scipy.special import erfc
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 
-from WaveformAnalysis import Dataset
+import dataset
 
-class SiPM(Dataset.Dataset):
+class SiPM(dataset.Dataset):
     def __init__(self, Path, Selection='*'):
         self.Path = Path
         self.Selection = Selection
@@ -31,8 +31,6 @@ class SiPM(Dataset.Dataset):
             filtered_waveform.append(filtfilt(b,a,amp))
         return filtered_waveform
 
-
-
     def get_averaged_waveform(self, time, amp, avg=4):
         avg_time = time[:-avg+1]
         avg_amp = np.convolve(amp,np.ones(avg),'valid')/avg
@@ -42,8 +40,6 @@ class SiPM(Dataset.Dataset):
         max_val = np.max(Amp[cut])
         max_pos_cut = np.where(Amp[cut] == np.max(Amp[cut]))[0][0]
         max_pos = D0.Ch[1].Time[cut][max_pos_cut]
-
-
 
     def setup_butter_filter(self, order=3):
         '''
@@ -58,8 +54,6 @@ class SiPM(Dataset.Dataset):
             b, a = butter(order, [(1/s_time)/nyq], btype='low', analog=False)
             self.filter_coefficients.append([b,a])
 
-            
-    
     def fit_peaks(self, time, data):
         peaks,pdict = find_peaks(data, height=35, width=20, distance=50)
         self.peak_pos.append(peaks)
@@ -85,9 +79,6 @@ class SiPM(Dataset.Dataset):
         x = x-mu
         return np.exp(-np.square((x-mu)/sigma)/2)/(sigma*np.sqrt(2*np.pi))
 
-
-
-    
     def get_sampling(self):
         '''
         Sets up sampling time and frequency that gets called only once
@@ -96,7 +87,6 @@ class SiPM(Dataset.Dataset):
         self.length = self.Ch[0].Time[-1] - self.Ch[0].Time[0]
         # print(self.Ch[0].Time[1])
         self.sampling_freq=(1/(self.Ch[0].Time[1] - self.Ch[0].Time[0]))*self.Ch[0].TScale
-
 
     def get_convolution_filter(self):
         xdata = self.Ch[0].Time
