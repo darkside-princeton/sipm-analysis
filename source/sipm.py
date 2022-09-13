@@ -6,7 +6,7 @@ from scipy.special import erfc
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 
-import dataset
+from source import dataset
 
 class SiPM(dataset.Dataset):
     def __init__(self, Path, Selection='*'):
