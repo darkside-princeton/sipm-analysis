@@ -1,0 +1,19 @@
+name: ds-pu
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - jupyter
+  - jupyterlab
+  - jupyter-server-proxy
+  - matplotlib>=3.4
+  - multiprocess
+  - notebook
+  - numpy
+  - pandas
+  - pip
+  - python=3.8
+  - pyyaml
+  - scipy
+  - uproot
+  - uproot3
