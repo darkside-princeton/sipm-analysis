@@ -29,5 +29,5 @@ pip install -e .
 ```
 Now you should be able to run one of the example Jupyter notebooks to test that your installation worked. 
 
-# Issues 
+# Problems 
 For any question reach out to Ako Jamil ([ako.jamil@princeton.edu](mailto:ako.jamil@princeton.edu)).
