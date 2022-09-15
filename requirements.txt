@@ -1,0 +1,8 @@
+notebook
+jupyter
+matplotlib
+numba
+numpy
+pandas
+scipy
+uproot3
