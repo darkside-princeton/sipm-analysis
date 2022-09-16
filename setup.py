@@ -26,9 +26,9 @@ def install_mplstyle():
 
 
 setup(
-  name='ds-pu',
+  name='ds-pu-sipm-analysis',
   version='1.0.0',
-  description=('DarkSide-20k Princeton Group.'),
+  description=('DarkSide-20k Princeton Group Python Analysis Code'),
   long_description=readme,
   author='Ako Jamil',
   author_email='akojamil93@gmail.com',
