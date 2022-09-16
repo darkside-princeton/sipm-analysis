@@ -17,3 +17,4 @@ dependencies:
   - scipy
   - uproot
   - uproot3
+  - h5py
