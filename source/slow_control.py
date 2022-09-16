@@ -36,20 +36,20 @@ class SlowControl():
         # sort along timestamp axis
         self.temp = self.temp.sort_values(0,axis=0)
     
-    def plot_temp(self,style='p'):
+    def plot_temp(self, style='p', start=0, end=-1):
         fig, ax = plt.subplots()
         fig.autofmt_xdate()
         date_form = mdates.DateFormatter("%H:%M")
         ax.xaxis.set_major_formatter(date_form)
 
         if style=='p':
-            plt.plot(self.temp[0], self.temp[1], label='Sensor 1')
-            plt.plot(self.temp[0], self.temp[2], label='Sensor 2')
+            plt.plot(self.temp[0][start:end], self.temp[1][start:end], label='Sensor 1')
+            plt.plot(self.temp[0][start:end], self.temp[2][start:end], label='Sensor 2')
         elif style=='s':
-            plt.scatter(self.temp[0], self.temp[1], label='Sensor 1', s=1)
-            plt.scatter(self.temp[0], self.temp[2], label='Sensor 2', s=1)
+            plt.scatter(self.temp[0][start:end], self.temp[1][start:end], label='Sensor 1', s=1)
+            plt.scatter(self.temp[0][start:end], self.temp[2][start:end], label='Sensor 2', s=1)
 
-        plt.hlines(xmin=np.min(self.temp[0]), xmax=np.max(self.temp[0]), y=87.3, linestyles='--', lw=1, color='k')
+        plt.hlines(xmin=np.min(self.temp[0][start:end]), xmax=np.max(self.temp[0][start:end]), y=87.3, linestyles='--', lw=1, color='k')
 
         plt.xlabel('Time [hh:mm]')
         plt.ylabel('Temperature [K]')
