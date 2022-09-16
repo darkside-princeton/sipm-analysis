@@ -3,7 +3,7 @@ import glob
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
-from source import waveform as wvf
+from dspusipm import waveform as wvf
 
 class Dataset: 
     def __init__(self,  Path, ShowPlots=True, Selection='*', Pol=1, NumChannels=2):
