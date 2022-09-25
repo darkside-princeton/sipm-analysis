@@ -26,7 +26,7 @@ def install_mplstyle():
 
 
 setup(
-  name='dspusipm',
+  name='sipm',
   version='1.0.0',
   description=('DarkSide-20k Princeton Group Python Analysis Code'),
   long_description=readme,
