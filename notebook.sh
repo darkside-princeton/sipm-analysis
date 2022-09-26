@@ -33,7 +33,7 @@ localhost:${port}  (prefix w/ https:// if using password)
 
 # load modules or conda environments here
 module load anaconda3/2021.11
-conda activate myenv
+conda activate ds-pu
 
 
 jupyter-notebook --no-browser --port=8888 --ip=${node}
