@@ -21,17 +21,18 @@ class SiPM():
     
     def read_data(self, header=True):
         file = open(self.file, 'rb')
-        for i in range(1000000):
-            if header:
+        if header:
+            for i in range(1000000):
                 self.header = np.fromfile(file, dtype=np.dtype('I'), count=6)
                 if len(self.header) == 0:
                     break
                 self.samples = (self.header[0] - 24) // 2
                 self.timestamp.append(self.header[-1])
                 trace = np.fromfile(file, dtype=np.dtype('<H'), count=self.samples)
-            else:
-                trace = np.fromfile(file, dtype=np.dtype('<H'), count=-1)
-            self.traces.append(trace)
+                self.traces.append(trace)
+        else:
+            self.traces = np.fromfile(file, dtype=np.dtype('<H'), count=-1)
+        
         file.close()
         self.traces = np.array(self.traces)
         self.traces = self.traces.reshape((-1,self.samples)).astype(float)
