@@ -1,13 +1,19 @@
 import numpy as np
+import yaml 
 
 import sipm.sipm as sipm
 
 class Dataset: 
-    def __init__(self,  path, pol=1, channels=4):
+    def __init__(self,  path, pol=1, channels=4, samples=3000):
         self.path = path
         self.channels = channels
+        self.samples = samples
         self.pol = pol
-        self.ch = self.InitializeChannels(self.channels, self.pol)
-
-    def InitializeChannels(self, num_channels=2, pol=1):
-        return [sipm.SiPM(id=ii, pol=pol, path=self.path) for ii in self.channels]
+        self.ch = self.InitializeChannels()
+        
+    def InitializeChannels(self):
+        channels = []
+        for i in self.channels:
+            new_channel = sipm.SiPM(id=i, pol=self.pol, path=self.path, samples=self.samples)
+            channels.append(new_channel)
+        return channels
