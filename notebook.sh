@@ -3,7 +3,7 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks-per-node 1
 #SBATCH --mem-per-cpu 8G
-#SBATCH --time 1:00:00
+#SBATCH --time 4:00:00
 #SBATCH --job-name jupyter-notebook
 #SBATCH --output jupyter-notebook-%J.log
 
@@ -32,7 +32,7 @@ localhost:${port}  (prefix w/ https:// if using password)
 "
 
 # load modules or conda environments here
-module load anaconda3/2021.11
+module load anaconda3/2022.5
 conda activate ds-pu
 
 
