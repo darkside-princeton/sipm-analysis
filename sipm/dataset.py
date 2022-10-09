@@ -10,7 +10,7 @@ class Dataset:
         self.samples = samples
         self.pol = pol
         self.ch = self.InitializeChannels()
-        self.gain = [263.83304269154604, 225.54550142289833, 246.43480002250982, 216.58835157109758] #Gain of each channel of top tile. Hard-coded for now
+        self.gain = [325.283, 306.669, 324.455, 330.207] #Gain of each channel of top tile @65V. Hard-coded for now
         
     def InitializeChannels(self):
         channels = []

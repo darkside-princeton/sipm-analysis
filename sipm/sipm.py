@@ -37,7 +37,7 @@ class SiPM():
                 self.samples = (self.header[0] - 24) // 2
                 self.timestamp.append(self.header[-1])
                 trace = np.fromfile(file, dtype=np.dtype('<H'), count=self.samples)
-            self.traces.append(trace)
+                self.traces.append(trace)
         if not header:
             self.traces = np.fromfile(file, dtype=np.dtype('<H'), count=-1)
         file.close()
@@ -48,7 +48,7 @@ class SiPM():
             self.ar_filtered_traces = np.zeros(np.shape(self.traces))
             self.time = np.arange(0,self.sample_step*self.samples,self.sample_step)
             self.trigger_position = np.argmax(self.pol*np.mean(self.traces,axis=0))
-            self.baseline_samples = self.trigger_position-10
+            self.baseline_samples = self.trigger_position-100
             self.nevents = np.shape(self.traces)[0]
             print('WAVEFORM LENGTH = {} SAMPLES'.format(self.samples))
             print('TRIGGER POSITION = SAMPLE {}'.format(self.trigger_position))
@@ -115,6 +115,16 @@ class SiPM():
                 self.spe_avgwf += self.traces[i,:]
                 count += 1
                 self.spe_avgwf /= count
+        self.clear()
+
+    def get_afterpulse_charge(self, xmin=0, xmax=1e3, nbins=100):
+        self.read_data(header=False,spe=True)
+        self.baseline_subtraction()
+        self.afterpulse_charge = []
+        for i,fa in enumerate(self.famp):
+            if fa<self.spe_famp[1] and fa>self.spe_famp[0]:
+                self.afterpulse_charge.append(np.sum(self.traces[i,self.baseline_samples:self.baseline_samples+1250]))
+        self.ap_charge_hist, self.ap_charge_hist_bin = np.histogram(self.afterpulse_charge, bins=nbins, range=(xmin,xmax))
         self.clear()
 
     def set_calibration(self, gain_integral=0, spe_integral=[0,0], gain_famp=0, spe_famp=[0,0]):
