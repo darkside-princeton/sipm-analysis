@@ -43,16 +43,25 @@ class SiPM():
         file.close()
         self.traces = np.array(self.traces)
         self.traces = self.traces.reshape((-1,self.samples)).astype(float)
+        self.time = np.arange(0,self.sample_step*self.samples,self.sample_step)
         if not spe:
             self.filtered_traces = np.zeros(np.shape(self.traces))
             self.ar_filtered_traces = np.zeros(np.shape(self.traces))
-            self.time = np.arange(0,self.sample_step*self.samples,self.sample_step)
             self.trigger_position = np.argmax(self.pol*np.mean(self.traces,axis=0))
             self.baseline_samples = self.trigger_position-100
             self.nevents = np.shape(self.traces)[0]
             print('WAVEFORM LENGTH = {} SAMPLES'.format(self.samples))
             print('TRIGGER POSITION = SAMPLE {}'.format(self.trigger_position))
             print('NUMBER OF WAVEFORMS = {}'.format(self.nevents))
+
+    def get_waveforms(self, event_id=[], header=True):
+        self.read_data(header=header, spe=True)
+        self.baseline_subtraction()
+        waveforms = []
+        for event_id_ in event_id:
+            waveforms.append(self.traces[event_id_,:])
+        self.clear()
+        return waveforms
 
     def baseline_subtraction(self):
         for ii,x in enumerate(self.traces):

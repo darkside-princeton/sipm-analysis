@@ -23,3 +23,14 @@ class Dataset:
         self.summed_integral_pe = np.zeros(self.ch[0].nevents)
         for i in self.channels:
             self.summed_integral_pe += np.array(self.ch[i].integral)/self.gain[i]
+
+    def get_waveforms_id(self, count=10, integral_range=(0,0)):
+        count_ = 0
+        event_id = []
+        ev = 0
+        while count_ < count and ev < self.ch[0].nevents:
+            if self.summed_integral_pe[ev]<integral_range[1] and self.summed_integral_pe[ev]>integral_range[0]:
+                event_id.append(ev)
+                count_ += 1
+            ev += 1
+        return event_id
