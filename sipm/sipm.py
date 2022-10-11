@@ -8,7 +8,7 @@ class SiPM():
         self.id = id
         self.pol = pol
         self.file = glob.glob(self.path+"wave{}.dat".format(self.id))[0]
-        self.sampling = 250000000 # in MHz
+        self.sampling = 250000000 # in Hz
         self.sample_step = 1./float(self.sampling)*1e6 # in us
         self.traces = []
         self.filtered_traces = []
@@ -98,9 +98,9 @@ class SiPM():
     def get_famp_hist(self, min=0, max=1e3, nbins=1000):
         self.famp_hist, self.famp_hist_bin = np.histogram(self.famp, bins=nbins, range=(min,max))
 
-    def get_integral(self, length=5):
+    def get_integral(self, length=7):
         '''
-        default integral length = 5 us
+        default integral length = 7 us
         '''
         self.integral = []
         for ii,x in enumerate(self.traces):
@@ -112,6 +112,8 @@ class SiPM():
 
     def get_avgwf(self):
         self.avgwf = np.mean(self.traces,axis=0)
+        while self.avgwf[self.trigger_position]>1:
+            self.trigger_position -= 1
 
     def get_spe_avgwf(self):
         self.read_data(header=False,spe=True)
@@ -146,11 +148,14 @@ class SiPM():
         if spe_famp!=[0,0]:
             self.spe_famp = spe_famp
 
-    def set_pulse_shape(self, a1=0, tau1=0, a2=0, tau2=0):
+    def set_pulse_pars(self, a1=0, tau1=0, a2=0, tau2=0):
         self.a1 = a1
         self.tau1 = tau1
         self.a2 = a2
         self.tau2 = tau2
+    
+    def get_pulse_pars(self):
+        return self.a1, self.tau1, self.a2, self.tau2
 
     def get_pulse_shape(self, t, a1=0, tau1=0, a2=0, tau2=0):
         if a1==0:
@@ -162,7 +167,15 @@ class SiPM():
         if tau2==0:
             tau2 = self.tau2        
         return a1*np.exp(-(t-self.trigger_position*self.sample_step)/tau1) + a2*np.exp(-(t-self.trigger_position*self.sample_step)/tau2)        
-    
+
+    def get_scintillation(self, t, a_s, tau_s, a_t, tau_t):
+        t_trg = self.trigger_position*self.sample_step
+        s1 = self.a1*a_t*tau_t*self.tau1*(np.exp(-(t-t_trg)/tau_t)-np.exp(-(t-t_trg)/self.tau1))/(tau_t-self.tau1)
+        s2 = self.a2*a_t*tau_t*self.tau2*(np.exp(-(t-t_trg)/tau_t)-np.exp(-(t-t_trg)/self.tau2))/(tau_t-self.tau2)
+        s3 = self.a1*a_s*tau_s*self.tau1*(np.exp(-(t-t_trg)/tau_s)-np.exp(-(t-t_trg)/self.tau1))/(tau_s-self.tau1)
+        s4 = self.a2*a_s*tau_s*self.tau2*(np.exp(-(t-t_trg)/tau_s)-np.exp(-(t-t_trg)/self.tau2))/(tau_s-self.tau2)
+        return s1+s2+s3+s4
+
     def clear(self):
         self.traces = []
         self.filtered_traces = []

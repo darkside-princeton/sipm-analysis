@@ -1,15 +1,6 @@
 from scipy.special import erf, gamma
 import numpy as np
 import scipy.integrate as integrate
-Q_SR90 = 0.546e3 #keV
-Q_Y90 = 2.28e3 #keV 
-Z_Y90 = 39
-Z_ZR90 = 40
-A_SR90 = 90
-ALPHA = 1/137
-HBAR = 6.582e-19 #keV-s
-C = 3e8 #m/s
-M_ELE = 511 #keV
 
 def Fermi_function(T: float, Z: int, A: int) -> float:
     '''s
