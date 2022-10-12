@@ -26,6 +26,8 @@ class SiPM():
         self.spe_integral = [0,0]
         self.gain_famp = 0
         self.spe_famp = [0,0]
+        self.tau_singlet = [0,0]
+        self.tau_triplet = [0,0]
     
     def read_data(self, header=True, spe=False):
         file = open(self.file, 'rb')
