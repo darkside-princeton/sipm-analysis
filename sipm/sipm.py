@@ -30,9 +30,8 @@ class SiPM():
         self.tau_triplet = [0,0]
         self.integral = []
     
-    def read_data(self, header=True, spe=False):
+    def read_data(self, header=True, spe=False, verbose=False):
         self.file = glob.glob(self.path+"wave{}.dat".format(self.id))[0]
-        print(self.file)
         file = open(self.file, 'rb')
         if header:
             for i in range(1000000):
@@ -58,9 +57,10 @@ class SiPM():
             self.baseline_samples = self.trigger_position-100
             self.nevents = np.shape(self.traces)[0]
             self.cumulative_nevents += self.nevents
-            print('WAVEFORM LENGTH = {} SAMPLES'.format(self.samples))
-            print('TRIGGER POSITION = SAMPLE {}'.format(self.trigger_position))
-            print('CUMULATIVE WAVEFORMS = {}'.format(self.cumulative_nevents))
+            if verbose:
+                print('WAVEFORM LENGTH = {} SAMPLES'.format(self.samples))
+                print('TRIGGER POSITION = SAMPLE {}'.format(self.trigger_position))
+                print('CUMULATIVE WAVEFORMS = {}'.format(self.cumulative_nevents))
 
     def get_waveforms(self, event_id=[], header=True):
         self.read_data(header=header, spe=True)
