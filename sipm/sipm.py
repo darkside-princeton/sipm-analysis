@@ -7,7 +7,6 @@ class SiPM():
         self.path = path
         self.id = id
         self.pol = pol
-        self.file = glob.glob(self.path+"wave{}.dat".format(self.id))[0]
         self.sampling = 250000000 # in Hz
         self.sample_step = 1./float(self.sampling)*1e6 # in us
         self.traces = []
@@ -21,15 +20,19 @@ class SiPM():
         self.timestamp = []
         self.trigger_position = 0
         self.nevents = 0
-        self.avgwf = []
+        self.cumulative_nevents = 0
+        self.avgwf = np.zeros(0)
         self.gain_integral = 0
         self.spe_integral = [0,0]
         self.gain_famp = 0
         self.spe_famp = [0,0]
         self.tau_singlet = [0,0]
         self.tau_triplet = [0,0]
+        self.integral = []
     
     def read_data(self, header=True, spe=False):
+        self.file = glob.glob(self.path+"wave{}.dat".format(self.id))[0]
+        print(self.file)
         file = open(self.file, 'rb')
         if header:
             for i in range(1000000):
@@ -46,15 +49,18 @@ class SiPM():
         self.traces = np.array(self.traces)
         self.traces = self.traces.reshape((-1,self.samples)).astype(float)
         self.time = np.arange(0,self.sample_step*self.samples,self.sample_step)
+        if self.avgwf.shape[0]==0:
+            self.avgwf = np.zeros(self.samples)
         if not spe:
             self.filtered_traces = np.zeros(np.shape(self.traces))
             self.ar_filtered_traces = np.zeros(np.shape(self.traces))
             self.trigger_position = np.argmax(self.pol*np.mean(self.traces,axis=0))
             self.baseline_samples = self.trigger_position-100
             self.nevents = np.shape(self.traces)[0]
+            self.cumulative_nevents += self.nevents
             print('WAVEFORM LENGTH = {} SAMPLES'.format(self.samples))
             print('TRIGGER POSITION = SAMPLE {}'.format(self.trigger_position))
-            print('NUMBER OF WAVEFORMS = {}'.format(self.nevents))
+            print('CUMULATIVE WAVEFORMS = {}'.format(self.cumulative_nevents))
 
     def get_waveforms(self, event_id=[], header=True):
         self.read_data(header=header, spe=True)
@@ -104,16 +110,15 @@ class SiPM():
         '''
         default integral length = 7 us
         '''
-        self.integral = []
         for ii,x in enumerate(self.traces):
-            tmax = int(min(self.baseline_samples+length/self.sample_step, self.samples))
-            self.integral.append(np.sum(x[self.baseline_samples:tmax]))
+            tmax = int(min(self.trigger_position+length/self.sample_step, self.samples))
+            self.integral.append(np.sum(x[self.trigger_position:tmax]))
 
     def get_integral_hist(self, min=0, max=5e3, nbins=1000):
         self.integral_hist, self.integral_hist_bin = np.histogram(self.integral, bins=nbins, range=(min,max))
 
     def get_avgwf(self):
-        self.avgwf = np.mean(self.traces,axis=0)
+        self.avgwf = self.avgwf*(1-self.nevents/self.cumulative_nevents) + np.mean(self.traces,axis=0)*self.nevents/self.cumulative_nevents
         while self.avgwf[self.trigger_position]>1:
             self.trigger_position -= 1
 

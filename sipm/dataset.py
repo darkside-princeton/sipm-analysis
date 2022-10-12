@@ -11,6 +11,7 @@ class Dataset:
         self.pol = pol
         self.ch = self.InitializeChannels()
         self.gain = []
+        self.summed_integral_pe = []
         if pos=='top':
             slope = np.array([43.893, 39.983, 41.399, 41.417])
             vbd = np.array([54.378, 54.880, 54.436, 55.156])
@@ -27,11 +28,8 @@ class Dataset:
             channels.append(new_channel)
         return channels
 
-    def merge(self):
-        return 0
-
     def get_summed_integral_pe(self):
-        self.summed_integral_pe = np.zeros(self.ch[0].nevents)
+        self.summed_integral_pe = np.zeros(self.ch[0].cumulative_nevents)
         for i in self.channels:
             self.summed_integral_pe += np.array(self.ch[i].integral)/self.gain[i]
 
