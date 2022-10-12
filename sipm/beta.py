@@ -1,6 +1,7 @@
 from scipy.special import erf, gamma
 import numpy as np
 import scipy.integrate as integrate
+import sipm.constants as const
 
 def Fermi_function(T: float, Z: int, A: int) -> float:
     '''s
@@ -8,12 +9,12 @@ def Fermi_function(T: float, Z: int, A: int) -> float:
     A: mass number of final state nucleus
     T: kinetic energy in keV
     '''
-    E = M_ELE + T #keV
-    p = np.sqrt(E**2 - M_ELE**2) #keV
-    S = np.sqrt(1-(ALPHA*Z)**2)
-    eta = ALPHA*Z*E/p
+    E = const.M_ELE + T #keV
+    p = np.sqrt(E**2 - const.M_ELE**2) #keV
+    S = np.sqrt(1-(const.ALPHA*Z)**2)
+    eta = const.ALPHA*Z*E/p
     R_N = A**(1/3)*1.2e-15 #m
-    return 2*(1+S)/gamma(1+2*S)**2 * (2*p*R_N/HBAR/C)**(2*(S-1)) * np.exp(np.pi*eta) * abs(gamma(complex(S, eta)))**2
+    return 2*(1+S)/gamma(1+2*S)**2 * (2*p*R_N/const.HBAR/const.C)**(2*(S-1)) * np.exp(np.pi*eta) * abs(gamma(complex(S, eta)))**2
 
 def U1F_shape(W: float, W0: float) -> float:
     '''
@@ -45,10 +46,10 @@ def beta_shape(T: float, Q: float, C: float, Z: int, A: int, u1f: bool) -> float
     if T>Q:
         return 0
     else:
-        E = M_ELE + T #keV
-        p = np.sqrt(E**2-M_ELE**2) #keV
+        E = const.M_ELE + T #keV
+        p = np.sqrt(E**2-const.M_ELE**2) #keV
         if u1f:
-            return C*Fermi_function(E,Z,A)*p*E*(Q-T)**2*U1F_shape(W=1+T/M_ELE, W0=1+Q/M_ELE)
+            return C*Fermi_function(E,Z,A)*p*E*(Q-T)**2*U1F_shape(W=1+T/const.M_ELE, W0=1+Q/const.M_ELE)
         else:
             return C*Fermi_function(E,Z,A)*p*E*(Q-T)**2
 
