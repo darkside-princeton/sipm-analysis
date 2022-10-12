@@ -12,6 +12,7 @@ class Dataset:
         self.ch = self.InitializeChannels()
         self.gain = []
         self.summed_integral_pe = []
+        self.fprompt = []
         if pos=='top':
             slope = np.array([43.893, 39.983, 41.399, 41.417])
             vbd = np.array([54.378, 54.880, 54.436, 55.156])
@@ -32,6 +33,12 @@ class Dataset:
         self.summed_integral_pe = np.zeros(self.ch[0].cumulative_nevents)
         for i in self.channels:
             self.summed_integral_pe += np.array(self.ch[i].integral)/self.gain[i]
+
+    def get_fprompt(self):
+        summed_prompt_integral_pe = np.zeros(self.ch[0].cumulative_nevents)
+        for i in self.channels:
+            summed_prompt_integral_pe += np.array(self.ch[i].prompt_integral)/self.gain[i]
+        self.fprompt = summed_prompt_integral_pe/self.summed_integral_pe
 
     def get_waveforms_id(self, count=10, integral_range=(0,0)):
         count_ = 0

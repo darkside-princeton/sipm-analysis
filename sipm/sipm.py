@@ -29,6 +29,7 @@ class SiPM():
         self.tau_singlet = [0,0]
         self.tau_triplet = [0,0]
         self.integral = []
+        self.prompt_integral = []
     
     def read_data(self, header=True, spe=False, verbose=False):
         self.file = glob.glob(self.path+"wave{}.dat".format(self.id))[0]
@@ -110,9 +111,17 @@ class SiPM():
         '''
         default integral length = 7 us
         '''
+        tmax = int(min(self.trigger_position+length/self.sample_step, self.samples))
         for ii,x in enumerate(self.traces):
-            tmax = int(min(self.trigger_position+length/self.sample_step, self.samples))
             self.integral.append(np.sum(x[self.trigger_position:tmax]))
+
+    def get_prompt_integral(self, length=1):
+        '''
+        default integral length = 1 us
+        '''
+        tmax = int(min(self.trigger_position+length/self.sample_step, self.samples))
+        for ii,x in enumerate(self.traces):
+            self.prompt_integral.append(np.sum(x[self.trigger_position:tmax]))
 
     def get_integral_hist(self, min=0, max=5e3, nbins=1000):
         self.integral_hist, self.integral_hist_bin = np.histogram(self.integral, bins=nbins, range=(min,max))
