@@ -206,6 +206,12 @@ class SiPM():
         if famp_peaks!=None:
             self.famp_peaks = famp_peaks
 
+    def set_correlated_noise(self, ap=0, ct=0):
+        if ap!=0:
+            self.ap = ap
+        if ct!=0:
+            self.ct = ct
+
     def set_pulse_pars(self, a1=0, tau1=0, a2=0, tau2=0):
         self.a1 = a1
         self.tau1 = tau1
