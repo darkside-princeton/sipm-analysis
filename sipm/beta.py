@@ -3,6 +3,9 @@ import numpy as np
 import scipy.integrate as integrate
 import sipm.constants as const
 
+NORM_SR90 = 6004718046792.3545
+NORM_Y90 = 2.056512394298567e+16
+
 def Fermi_function(T: float, Z: int, A: int) -> float:
     '''s
     Z: atomic number of final state nucleus
@@ -60,11 +63,51 @@ def response(E: float, Npe: float, gamma: float, Lyp: float) -> float:
     return np.exp(-0.5*(Npe-E*Lyp)**2/(Npe*gamma))/np.sqrt(2*np.pi*Npe*gamma)
 
 def beta_spectrum(Npe: float, C: float, gamma: float, Lyp: float, Q: float, Z: int, A: int, u1f: bool) -> float:
-    return integrate.quad(lambda x: beta_shape(x, Q, C, Z, A, u1f)*response(x, Npe, gamma, Lyp), 0, Q)[0]
+    return np.array([integrate.quad(lambda x: beta_shape(x, Q, C, Z, A, u1f)*response(x, Npe_, gamma, Lyp), 0, Q)[0] for Npe_ in Npe])
 
 def trigger_eff(Npe: float, N0: float, B: float) -> float:
     '''
     N0: cutoff
     B: sharpness
     '''
-    return 0.5*(1+erf((Npe-N0)/B))
+    return 0.5*(1+erf((Npe-N0)/B/np.sqrt(Npe)))
+
+def backgrounds(Npe: float, b=float) -> float:
+    '''
+    b=slope
+    '''
+    return b*np.exp(-b*Npe)
+
+def model(Npe: float, n_beta:float, n_bkg:float, N0_trig:float, B_trig:float, enf:float, b_bkg:float, lyp: float):
+    '''
+    Count [1/Npe]
+    n_beta: beta count
+    n_bkg: background count
+    N0_trig, B_trig: trigger efficiency parameters
+    b_bkg: background parameters
+    enf: excess noise factor
+    lyp: gross light yield 
+    return: sr90, y90, bkg, total
+    '''
+    sr90 = 0.5*beta_spectrum(Npe, C=1/NORM_SR90, gamma=enf, Lyp=lyp, Q=const.Q_SR90, Z=const.Z_Y90, A=const.A_SR90, u1f=True)
+    y90 = 0.5*beta_spectrum(Npe, C=1/NORM_Y90, gamma=enf, Lyp=lyp, Q=const.Q_Y90, Z=const.Z_ZR90, A=const.A_SR90, u1f=True)
+    bkg = backgrounds(Npe, b=b_bkg)
+    trig = trigger_eff(Npe, N0=N0_trig, B=B_trig)
+    return trig*n_beta*sr90, trig*n_beta*y90, trig*n_bkg*bkg, trig*(n_beta*(sr90+y90)+n_bkg*bkg)
+
+def model_total(Npe: float, n_beta:float, n_bkg:float, N0_trig:float, B_trig:float, enf:float, b_bkg:float, lyp: float):
+    '''
+    Count [1/Npe]
+    n_beta: beta count
+    n_bkg: background count
+    N0_trig, B_trig: trigger efficiency parameters
+    b_bkg: background parameters
+    enf: excess noise factor
+    lyp: gross light yield 
+    return: sr90, y90, bkg, total
+    '''
+    sr90 = 0.5*beta_spectrum(Npe, C=1/NORM_SR90, gamma=enf, Lyp=lyp, Q=const.Q_SR90, Z=const.Z_Y90, A=const.A_SR90, u1f=True)
+    y90 = 0.5*beta_spectrum(Npe, C=1/NORM_Y90, gamma=enf, Lyp=lyp, Q=const.Q_Y90, Z=const.Z_ZR90, A=const.A_SR90, u1f=True)
+    bkg = backgrounds(Npe, b=b_bkg)
+    trig = trigger_eff(Npe, N0=N0_trig, B=B_trig)
+    return trig*(n_beta*(sr90+y90)+n_bkg*bkg)
