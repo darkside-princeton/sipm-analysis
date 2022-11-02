@@ -1,6 +1,25 @@
 import numpy as np
 import glob
 from scipy import signal
+from scipy.signal import find_peaks
+from scipy.optimize import curve_fit
+from scipy.special import gamma
+
+def gauss(x,N,mu,sigma):
+    return N*np.exp(-(x-mu)**2/(2*sigma**2))/np.sqrt(2*np.pi)/sigma
+
+def compound_poisson(x,n,mu,p):
+    k = [int(x_+0.5) for x_ in x]
+    ans = []
+    for k_ in k:
+        if k_==0:
+            ans.append(n*np.exp(-mu))
+        else:
+            ans_ = 0
+            for i in range(1,k_+1):
+                ans_ += gamma(k_+1)*gamma(k_)/gamma(i+1)/gamma(i)/gamma(k_-i+1)*(mu*(1-p))**i*p**(k_-i)
+            ans.append(n*ans_*np.exp(-mu)/gamma(k_+1))
+    return ans
 
 class SiPM():
     def __init__(self, id, pol, path, samples):
@@ -31,20 +50,22 @@ class SiPM():
         self.famp = []
         self.famp_hist = None
         self.famp_hist_bin = None
+        self.famp_hist_fit = None
         self.integral_prompt = []
         self.integral_prompt_hist = None
         self.integral_prompt_hist_bin = None
         self.integral_short = []
         self.integral_short_hist = None
         self.integral_short_hist_bin = None
+        self.integral_short_hist_fit = None
         self.integral_long = []
         self.integral_long_hist = None
         self.integral_long_hist_bin = None
-        # things from histograms
-        self.gain_integral = 0 # spe integral
-        self.integral_peaks = None # integral peak range (mu+/-2sigma)
-        self.gain_famp = 0 # spe filtered amp
-        self.famp_peaks = None # filtered amp peak range (mu+/-2sigma)
+        self.integral_long_hist_fit = None
+        # spe gain
+        self.q_a = None # SPE filtered amplitude [Q_A, Q_A err]
+        self.q_peak = None # SPE 5us integral [Q_peak, Q_peak err]
+        self.q_avg = None # SPE 5us integral + AP [Q_avg, Q_avg err]
         # fitted pulse shape parameters and errors
         self.a1 = None
         self.tau1 = None
@@ -62,7 +83,7 @@ class SiPM():
         self.file = glob.glob(self.path+"wave{}.dat".format(self.id))[0]
         file = open(self.file, 'rb')
         if header:
-            for i in range(1000000):
+            for i in range(80000):
                 self.header = np.fromfile(file, dtype=np.dtype('I'), count=6)
                 if len(self.header) == 0:
                     break
@@ -89,6 +110,8 @@ class SiPM():
                 print('WAVEFORM LENGTH = {} SAMPLES'.format(self.samples))
                 print('TRIGGER POSITION = SAMPLE {}'.format(self.trigger_position))
                 print('CUMULATIVE WAVEFORMS = {}'.format(self.cumulative_nevents))
+                for k in range(10):
+                    print(self.traces[k,:])
 
     def get_waveforms(self, event_id=[], header=True):
         if self.traces==[]:
@@ -130,7 +153,7 @@ class SiPM():
             self.peak_pos.append(np.argmax(x))
 
     def get_famp(self):
-        self.famp = np.max(self.ar_filtered_traces, axis=1)
+        self.famp = np.max(self.ar_filtered_traces[:,self.trigger_position-15:self.trigger_position+20], axis=1)
 
     def get_famp_hist(self, bin=[]):
         '''
@@ -164,6 +187,55 @@ class SiPM():
         if long!=None:
             self.integral_long_hist, self.integral_long_hist_bin = np.histogram(self.integral_long, bins=long[2], range=(long[0],long[1]))
 
+    def find_histo_peaks(self, hist, thre, prom, wid, dist):
+        self.thre = thre
+        if hist=='integral_short':
+            self.peaks, self.pdict = find_peaks(self.integral_short_hist[thre:], prominence=prom, width=wid, distance=dist)
+        elif hist=='integral_long':
+            self.peaks, self.pdict = find_peaks(self.integral_long_hist[thre:], prominence=prom, width=wid, distance=dist)
+        elif hist=='famp':
+            self.peaks, self.pdict = find_peaks(self.famp_hist[thre:], prominence=prom, width=wid, distance=dist)
+        else:
+            print('no option called {}'.format(hist))
+            print('available options: integral_short/integral_long/famp')
+
+    def fit_histo_peaks(self, hist):
+        histo = None
+        histo_bins = None
+        if hist=='integral_short':
+            histo = self.integral_short_hist
+            histo_bins = self.integral_short_hist_bin
+        elif hist=='integral_long':
+            histo = self.integral_long_hist
+            histo_bins = self.integral_long_hist_bin
+        elif hist=='famp':
+            histo = self.famp_hist
+            histo_bins = self.famp_hist_bin
+        else:
+            print('no option called {}'.format(hist))
+            print('available options: integral_short/integral_long/famp')
+            return None
+        bin_width = histo_bins[1]-histo_bins[0]
+        gauss_fit = []
+        min_bins = []
+        max_bins = []
+        for ip,peak_bin in enumerate(self.peaks):
+            peak_bin = peak_bin + self.thre
+            pe_width_bin = int(self.pdict['widths'][ip])
+            pe_width_x = bin_width*pe_width_bin
+            min_bins.append(peak_bin-pe_width_bin)
+            max_bins.append(peak_bin+pe_width_bin)
+            peak_x = histo_bins[0] + bin_width*peak_bin
+            popt,pcov = curve_fit(gauss, histo_bins[min_bins[ip]:max_bins[ip]], histo[min_bins[ip]:max_bins[ip]], p0=[histo[peak_bin], peak_x, pe_width_x], sigma=np.sqrt(histo[min_bins[ip]:max_bins[ip]]), maxfev=10000)
+            gauss_fit.append([ [popt[ipar], np.sqrt(pcov[ipar,ipar])] for ipar in range(3) ]) #[ [N,N_err], [mu,mu_err], [sigma,sigma_err] ]
+        if hist=='integral_short':
+            self.integral_short_hist_fit = gauss_fit
+        elif hist=='integral_long':
+            self.integral_long_hist_fit = gauss_fit
+        elif hist=='famp':
+            self.famp_hist_fit = gauss_fit
+        return min_bins, max_bins
+
     def get_avgwf(self):
         self.avgwf = self.avgwf*(1-self.nevents/self.cumulative_nevents) + np.mean(self.traces,axis=0)*self.nevents/self.cumulative_nevents
         while self.avgwf[self.trigger_position]>1:
@@ -171,40 +243,38 @@ class SiPM():
 
     def get_spe_avgwf(self):
         if self.traces==[]:
-            self.read_data(header=False,simple=True)
+            self.read_data(header=True,simple=True)
             self.baseline_subtraction()
         self.spe_avgwf = np.zeros(self.samples)
         count = 0
         for i,fa in enumerate(self.famp):
-            if fa>self.famp_peaks[0][0] and fa<self.famp_peaks[0][1]:
+            if abs(fa-self.famp_hist_fit[0][1][0]) < 2*self.famp_hist_fit[0][2][0]:
                 self.spe_avgwf *= count
                 self.spe_avgwf += self.traces[i,:]
                 count += 1
                 self.spe_avgwf /= count
 
-    def get_afterpulse_charge(self, xmin=-300, xmax=3000, nbins=500):
+    def get_afterpulse_charge(self, nsigma=3, bin=[-300, 6000, 500]):
         self.ap_charge = []
         self.ap_charge_hist = []
         self.ap_charge_hist_bin = []
-        for pe in range(len(self.famp_peaks)):
+        for pe in range(len(self.famp_hist_fit)):
             ap_charge = []
             for i,fa in enumerate(self.famp):
-                if fa>self.famp_peaks[pe][0] and fa<self.famp_peaks[pe][1]:
+                if abs(fa-self.famp_hist_fit[pe][1][0]) < nsigma*self.famp_hist_fit[pe][2][0]:
                     ap_charge.append(self.integral_long[i])
-            ap_charge_hist, ap_charge_hist_bin = np.histogram(ap_charge, bins=nbins, range=(xmin,xmax))
+            ap_charge_hist, ap_charge_hist_bin = np.histogram(ap_charge, bins=bin[2], range=(bin[0],bin[1]))
             self.ap_charge.append(ap_charge)
             self.ap_charge_hist.append(ap_charge_hist)
             self.ap_charge_hist_bin.append(ap_charge_hist_bin)
 
-    def set_calibration(self, gain_integral=0, integral_peaks=None, gain_famp=0, famp_peaks=None):
-        if gain_integral!=0:
-            self.gain_integral = gain_integral
-        if integral_peaks!=None:
-            self.integral_peaks = integral_peaks
-        if gain_famp!=0:
-            self.gain_famp = gain_famp
-        if famp_peaks!=None:
-            self.famp_peaks = famp_peaks
+    def set_spe_gain(self, q_a=None, q_peak=None, q_avg=None):
+        if q_a!=None:
+            self.q_a = q_a
+        if q_peak!=None:
+            self.q_peak = q_peak
+        if q_avg!=None:
+            self.q_avg = q_avg
 
     def set_correlated_noise(self, ap=0, ct=0):
         if ap!=0:
