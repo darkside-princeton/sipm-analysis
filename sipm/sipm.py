@@ -34,7 +34,9 @@ class SiPM():
         self.timestamp = []
         self.samples = samples #waveform length
         self.nevents = 0
+        self.acquisition_time = 0 # in seconds
         self.cumulative_nevents = 0 # in case it needs to read multiple files
+        self.cumulative_time = 0 # in seconds
         # waveforms
         self.traces = [] #raw
         self.filtered_traces = [] # band pass filtered
@@ -82,13 +84,20 @@ class SiPM():
     def read_data(self, header=True, simple=False, verbose=False):
         self.file = glob.glob(self.path+"wave{}.dat".format(self.id))[0]
         file = open(self.file, 'rb')
+        self.acquisition_time = 0
         if header:
-            for i in range(80000):
+            for i in range(100000):
                 self.header = np.fromfile(file, dtype=np.dtype('I'), count=6)
                 if len(self.header) == 0:
                     break
                 self.samples = (self.header[0] - 24) // 2
-                self.timestamp.append(self.header[-1])
+                self.timestamp.append(self.header[-1]%(2**31))
+                if i>0:
+                    self.acquisition_time += (self.timestamp[-1]-self.timestamp[-2])*8e-9
+                    if self.timestamp[-1]<self.timestamp[-2]:
+                        self.acquisition_time += 8e-9*2**31
+                else:
+                    self.acquisition_time += self.timestamp[-1]*8e-9
                 trace = np.fromfile(file, dtype=np.dtype('<H'), count=self.samples)
                 self.traces.append(trace)
         if not header:
@@ -106,6 +115,7 @@ class SiPM():
             self.baseline_samples = self.trigger_position-50
             self.nevents = np.shape(self.traces)[0]
             self.cumulative_nevents += self.nevents
+            self.cumulative_time += self.acquisition_time
             if verbose:
                 print('WAVEFORM LENGTH = {} SAMPLES'.format(self.samples))
                 print('TRIGGER POSITION = SAMPLE {}'.format(self.trigger_position))
@@ -115,7 +125,7 @@ class SiPM():
 
     def get_waveforms(self, event_id=[], header=True):
         if self.traces==[]:
-            self.read_data(header=header, spe=True)
+            self.read_data(header=header, simple=True)
             self.baseline_subtraction()
         waveforms = []
         for event_id_ in event_id:
