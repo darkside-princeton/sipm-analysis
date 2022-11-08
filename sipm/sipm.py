@@ -29,6 +29,15 @@ class SiPM():
         self.timestamp = []
     
     def read_data(self, header=True, num_events=1e9):
+        """Reads data from the binary wavedump file storing the waveforms.
+
+        Parameters
+        ----------
+        header : bool, optional
+            Whether or not the wavedump file includes an header for each waveform which includes information about the length of the waveform and the unique timestamp (default is True)
+        num_events : int, optional
+            Number of waveforms to read from each wavedump file (default is all (1e9))
+        """
         for f in sorted(self.files):
             file = open(f, 'rb')
             if header:
