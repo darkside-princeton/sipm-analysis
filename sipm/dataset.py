@@ -17,15 +17,29 @@ class Dataset:
         for i in self.channels:
             new_channel = sipm.SiPM(id=i, pol=self.pol, path=self.path, samples=self.samples)
             channels.append(new_channel)
-        return channels
+        return np.array(channels)
     
-    def analyze(self, header=True, num_events=1e9):
+    def analyze(self, header=True, num_events=1e9, clear=True, combine=False):
         for i in self.channels:
             self.ch[i].read_data(header=header, num_events=num_events)
             self.ch[i].bandpass_filter(low=1, high=8e6, order=1)
             self.ch[i].baseline_subtraction()
-            self.ch[i].get_max()
-            self.ch[i].get_integral()
+        if combine:
+            self.combine_traces(clear=clear)
+            self.sum.get_max()
+            self.sum.get_integral()
+        else:
+            for i in self.channels:
+                self.ch[i].get_max()
+                self.ch[i].get_integral()
+        if clear:
+            self.clear()
+            self.sum.clear()
+
+    def combine_traces(self, clear=True):
+        self.sum = sipm.SiPM(id=-1, pol=self.pol, path=self.path, samples=self.samples)
+        self.sum.traces = np.array([self.ch[i].traces for i in self.channels])
+        self.sum.traces = np.sum(self.sum.traces, axis=0)
     
     def calibrate(self):
         for i in self.channels:
@@ -35,4 +49,5 @@ class Dataset:
     def clear(self):
         for i in self.channels:
             self.ch[i].clear()
+    
         

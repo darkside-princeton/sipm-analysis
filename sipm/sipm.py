@@ -43,7 +43,7 @@ class SiPM():
             if header:
                 for i in range(1000000):
                     self.header = np.fromfile(file, dtype=np.dtype('I'), count=6)
-                    if len(self.header) == 0 or i>num_events:
+                    if len(self.header) == 0 or i==num_events:
                         break
                     self.samples = (self.header[0] - 24) // 2
                     self.timestamp.append(self.header[-1])
@@ -72,16 +72,20 @@ class SiPM():
         for ii,x in enumerate(self.traces):
             self.traces[ii] = signal.filtfilt(*self.filt_pars, x)
     
-    def get_max(self):
+    def get_max(self, traces=None):
+        if traces == None:
+            traces = self.traces
         self.peak = []
         self.peak_pos = []
-        for ii,x in enumerate(self.traces):
+        for ii,x in enumerate(traces):
             self.peak.append(np.max(x))
             self.peak_pos.append(np.argmax(x))
 
-    def get_integral(self):
+    def get_integral(self, traces=None):
+        if traces == None:
+            traces = self.traces
         self.integral = []
-        for ii,x in enumerate(self.traces):
+        for ii,x in enumerate(traces):
             self.integral.append(np.sum(x[1500:]))
             # self.integral.append(np.sum(x[self.peak_pos[ii]-50:]))
             # self.integral.append(np.sum(x))
