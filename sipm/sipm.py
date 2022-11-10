@@ -37,6 +37,7 @@ class SiPM():
         self.acquisition_time = 0 # in seconds
         self.cumulative_nevents = 0 # in case it needs to read multiple files
         self.cumulative_time = 0 # in seconds
+        self.avgwf_count = 0
         # waveforms
         self.traces = [] #raw
         self.filtered_traces = [] # band pass filtered
@@ -246,10 +247,15 @@ class SiPM():
             self.famp_hist_fit = gauss_fit
         return min_bins, max_bins
 
-    def get_avgwf(self):
-        self.avgwf = self.avgwf*(1-self.nevents/self.cumulative_nevents) + np.mean(self.traces,axis=0)*self.nevents/self.cumulative_nevents
-        while self.avgwf[self.trigger_position]>1:
-            self.trigger_position -= 1
+    def get_avgwf(self, integral_range):
+        self.avgwf *= self.avgwf_count
+        for i,wf in enumerate(self.traces):
+            if self.integral_long[i]<integral_range[1] and self.integral_long[i]>integral_range[0]:
+                self.avgwf_count += 1
+                self.avgwf += wf
+        self.avgwf /= self.avgwf_count
+        # while self.avgwf[self.trigger_position]>1:
+        #     self.trigger_position -= 1
 
     def get_spe_avgwf(self):
         if self.traces==[]:
