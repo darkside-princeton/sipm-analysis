@@ -3,7 +3,7 @@ import glob
 from scipy import signal
 from scipy.signal import find_peaks
 from scipy.optimize import curve_fit
-from scipy.special import gamma
+from scipy.special import gamma, erf
 
 def gauss(x,N,mu,sigma):
     return N*np.exp(-(x-mu)**2/(2*sigma**2))/np.sqrt(2*np.pi)/sigma
@@ -20,6 +20,9 @@ def compound_poisson(x,n,mu,p):
                 ans_ += gamma(k_+1)*gamma(k_)/gamma(i+1)/gamma(i)/gamma(k_-i+1)*(mu*(1-p))**i*p**(k_-i)
             ans.append(n*ans_*np.exp(-mu)/gamma(k_+1))
     return ans
+
+def pulse_jitter(t, a, tau, sigma, t0):
+    return a*np.exp(sigma**2/2/tau**2)*np.exp(-(t-t0)/tau)*(1+erf((t-t0-sigma**2/tau)/sigma/np.sqrt(2)))/2
 
 class SiPM():
     def __init__(self, id, pol, path, samples):
@@ -70,12 +73,12 @@ class SiPM():
         self.q_peak = None # SPE 5us integral [Q_peak, Q_peak err]
         self.q_avg = None # SPE 5us integral + AP [Q_avg, Q_avg err]
         # fitted pulse shape parameters and errors
-        self.a1 = None
-        self.tau1 = None
-        self.a2 = None
-        self.tau2 = None
-        self.tau_singlet = None
-        self.tau_triplet = None
+        self.a1 = []
+        self.tau1 = []
+        self.a2 = []
+        self.tau2 = []
+        self.tau_singlet = []
+        self.tau_triplet = []
         # after-pulse
         self.ap_charge = [] # list of list of long integral for each famp pe peak
         self.ap_charge_hist = [] # list of long integral histogram for each famp pe peak
@@ -87,7 +90,7 @@ class SiPM():
         file = open(self.file, 'rb')
         self.acquisition_time = 0
         if header:
-            for i in range(100000):
+            for i in range(80000):
                 self.header = np.fromfile(file, dtype=np.dtype('I'), count=6)
                 if len(self.header) == 0:
                     break
@@ -307,26 +310,14 @@ class SiPM():
     def get_pulse_pars(self):
         return self.a1, self.tau1, self.a2, self.tau2
 
-    def get_pulse_shape(self, t, a1=[0,0], tau1=[0,0], a2=[0,0], tau2=[0,0]):
-        '''
-        a1=[a1, a1_err]
-        '''
-        if a1==0:
-            a1 = self.a1
-        if tau1==0:
-            tau1 = self.tau1
-        if a2==0:
-            a2 = self.a2
-        if tau2==0:
-            tau2 = self.tau2        
-        return a1*np.exp(-(t-self.trigger_position*self.sample_step)/tau1) + a2*np.exp(-(t-self.trigger_position*self.sample_step)/tau2)        
-
-    def get_scintillation(self, t, a_s, tau_s, a_t, tau_t):
-        t_trg = self.trigger_position*self.sample_step
-        s1 = self.a1*a_t*tau_t*self.tau1*(np.exp(-(t-t_trg)/tau_t)-np.exp(-(t-t_trg)/self.tau1))/(tau_t-self.tau1)
-        s2 = self.a2*a_t*tau_t*self.tau2*(np.exp(-(t-t_trg)/tau_t)-np.exp(-(t-t_trg)/self.tau2))/(tau_t-self.tau2)
-        s3 = self.a1*a_s*tau_s*self.tau1*(np.exp(-(t-t_trg)/tau_s)-np.exp(-(t-t_trg)/self.tau1))/(tau_s-self.tau1)
-        s4 = self.a2*a_s*tau_s*self.tau2*(np.exp(-(t-t_trg)/tau_s)-np.exp(-(t-t_trg)/self.tau2))/(tau_s-self.tau2)
+    def get_pulse_shape(self, t, a1, tau1, a2, tau2, sigma, t0):
+        return pulse_jitter(t, a1, tau1, sigma, t0) + pulse_jitter(t, a2, tau2, sigma, t0)
+        
+    def get_scintillation(self, t, a_s, tau_s, a_t, tau_t, sigma, t0):
+        s1 = self.a1*a_t*tau_t*self.tau1/(tau_t-self.tau1)*(pulse_jitter(t,1,tau_t,sigma,t0)-pulse_jitter(t,1,self.tau1,sigma,t0))
+        s2 = self.a2*a_t*tau_t*self.tau2/(tau_t-self.tau2)*(pulse_jitter(t,1,tau_t,sigma,t0)-pulse_jitter(t,1,self.tau2,sigma,t0))
+        s3 = self.a1*a_s*tau_s*self.tau1/(tau_s-self.tau1)*(pulse_jitter(t,1,tau_s,sigma,t0)-pulse_jitter(t,1,self.tau1,sigma,t0))
+        s4 = self.a2*a_s*tau_s*self.tau2/(tau_s-self.tau2)*(pulse_jitter(t,1,tau_s,sigma,t0)-pulse_jitter(t,1,self.tau2,sigma,t0))
         return s1+s2+s3+s4
 
     def clear(self):
