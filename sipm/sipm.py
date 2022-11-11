@@ -90,7 +90,7 @@ class SiPM():
         file = open(self.file, 'rb')
         self.acquisition_time = 0
         if header:
-            for i in range(80000):
+            for i in range(50000):
                 self.header = np.fromfile(file, dtype=np.dtype('I'), count=6)
                 if len(self.header) == 0:
                     break
@@ -116,7 +116,7 @@ class SiPM():
             self.filtered_traces = np.zeros(np.shape(self.traces))
             self.ar_filtered_traces = np.zeros(np.shape(self.traces))
             self.trigger_position = np.argmax(self.pol*np.mean(self.traces,axis=0))
-            self.baseline_samples = self.trigger_position-50
+            self.baseline_samples = self.trigger_position-int(0.5/self.sample_step)
             self.nevents = np.shape(self.traces)[0]
             self.cumulative_nevents += self.nevents
             self.cumulative_time += self.acquisition_time
@@ -176,19 +176,19 @@ class SiPM():
         self.famp_hist, self.famp_hist_bin = np.histogram(self.famp, bins=bin[2], range=(bin[0],bin[1]))
 
     def get_integral(self, prompt=None, short=None, long=None):
-        t0 = self.trigger_position
+        t0 = self.baseline_samples
         if prompt!=None:
-            tp = int(prompt/self.sample_step)
+            tp = self.trigger_position+int(prompt/self.sample_step)
             for i,wf in enumerate(self.traces):
-                self.integral_prompt.append(np.sum(wf[t0:t0+tp]))
+                self.integral_prompt.append(np.sum(wf[t0:tp]))
         if short!=None:
-            ts = int(short/self.sample_step)
+            ts = self.trigger_position+int(short/self.sample_step)
             for i,wf in enumerate(self.traces):
-                self.integral_short.append(np.sum(wf[t0:t0+ts]))
+                self.integral_short.append(np.sum(wf[t0:ts]))
         if long!=None:
-            tl = int(long/self.sample_step)
+            tl = self.trigger_position+int(long/self.sample_step)
             for i,wf in enumerate(self.traces):
-                self.integral_long.append(np.sum(wf[t0:t0+tl]))
+                self.integral_long.append(np.sum(wf[t0:tl]))
 
     def get_integral_hist(self, prompt=None, short=None, long=None):
         '''
@@ -314,11 +314,7 @@ class SiPM():
         return pulse_jitter(t, a1, tau1, sigma, t0) + pulse_jitter(t, a2, tau2, sigma, t0)
         
     def get_scintillation(self, t, a_s, tau_s, a_t, tau_t, sigma, t0):
-        s1 = self.a1*a_t*tau_t*self.tau1/(tau_t-self.tau1)*(pulse_jitter(t,1,tau_t,sigma,t0)-pulse_jitter(t,1,self.tau1,sigma,t0))
-        s2 = self.a2*a_t*tau_t*self.tau2/(tau_t-self.tau2)*(pulse_jitter(t,1,tau_t,sigma,t0)-pulse_jitter(t,1,self.tau2,sigma,t0))
-        s3 = self.a1*a_s*tau_s*self.tau1/(tau_s-self.tau1)*(pulse_jitter(t,1,tau_s,sigma,t0)-pulse_jitter(t,1,self.tau1,sigma,t0))
-        s4 = self.a2*a_s*tau_s*self.tau2/(tau_s-self.tau2)*(pulse_jitter(t,1,tau_s,sigma,t0)-pulse_jitter(t,1,self.tau2,sigma,t0))
-        return s1+s2+s3+s4
+        return pulse_jitter(t, a_s, tau_s, sigma, t0) + pulse_jitter(t, a_t, tau_t, sigma, t0)
 
     def clear(self):
         self.traces = []
