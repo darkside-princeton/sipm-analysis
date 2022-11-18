@@ -4,6 +4,7 @@ from scipy import signal
 from scipy.signal import find_peaks
 from scipy.optimize import curve_fit
 from scipy.special import gamma, erf
+from scipy.fft import fft, ifft
 
 def gauss(x,N,mu,sigma):
     return N*np.exp(-(x-mu)**2/(2*sigma**2))/np.sqrt(2*np.pi)/sigma
@@ -45,11 +46,18 @@ class SiPM():
         self.traces = [] #raw
         self.filtered_traces = [] # band pass filtered
         self.ar_filtered_traces = []# ar filtered
+        self.deconv = []#deconvolution
         self.time = [] #time array
         self.avgwf = np.zeros(0) # overall average
         self.spe_avgwf = None # spe waveform
         self.baseline_samples = 0 # will be modified to trigger_position - 10 samples
-        self.trigger_position = 0   
+        self.trigger_position = 0
+        # baseline
+        self.baseline_mean = []
+        self.baseline_median = []
+        self.baseline_std = []
+        self.baseline_min = []
+        self.baseline_max = []
         # band pass filter
         self.filt_pars = None
         # histograms
@@ -103,7 +111,8 @@ class SiPM():
                 else:
                     self.acquisition_time += self.timestamp[-1]*8e-9
                 trace = np.fromfile(file, dtype=np.dtype('<H'), count=self.samples)
-                self.traces.append(trace)
+                if np.shape(trace)[0]==self.samples:
+                    self.traces.append(trace)
         if not header:
             self.traces = np.fromfile(file, dtype=np.dtype('<H'), count=-1)
         file.close()
@@ -140,6 +149,11 @@ class SiPM():
     def baseline_subtraction(self):
         for ii,x in enumerate(self.traces):
             baseline = np.mean(self.traces[ii][:self.baseline_samples])
+            self.baseline_mean.append(baseline)
+            self.baseline_median.append(np.median(self.traces[ii][:self.baseline_samples]))
+            self.baseline_std.append(np.std(self.traces[ii][:self.baseline_samples]))
+            self.baseline_min.append(np.min(self.traces[ii][:self.baseline_samples]))
+            self.baseline_max.append(np.max(self.traces[ii][:self.baseline_samples]))
             self.traces[ii] -= baseline
             self.traces[ii] *= self.pol
 
@@ -159,6 +173,13 @@ class SiPM():
                 wf_filt[i] = raw
         self.ar_filtered_traces = np.array(list(reversed(wf_filt))).transpose()
             
+    def deconvolution(self):
+        h = lambda x: self.a1*np.exp(-x/self.tau1)+self.a2*np.exp(-x/self.tau2)
+        for i,wf in enumerate(self.traces):
+            ftilde = fft(wf)
+            htilde = fft(h(self.time))
+            self.deconv.append(ifft(ftilde/htilde).real)
+
     def get_max(self):
         self.peak = []
         self.peak_pos = []
@@ -167,7 +188,7 @@ class SiPM():
             self.peak_pos.append(np.argmax(x))
 
     def get_famp(self):
-        self.famp = np.max(self.ar_filtered_traces[:,self.trigger_position-15:self.trigger_position+20], axis=1)
+        self.famp = np.concatenate((self.famp, np.max(self.ar_filtered_traces[:,self.trigger_position-15:self.trigger_position+20], axis=1)))
 
     def get_famp_hist(self, bin=[]):
         '''
@@ -175,20 +196,34 @@ class SiPM():
         '''
         self.famp_hist, self.famp_hist_bin = np.histogram(self.famp, bins=bin[2], range=(bin[0],bin[1]))
 
-    def get_integral(self, prompt=None, short=None, long=None):
+    def get_integral(self, prompt=None, short=None, long=None, deconv=False):
         t0 = self.baseline_samples
-        if prompt!=None:
-            tp = self.trigger_position+int(prompt/self.sample_step)
-            for i,wf in enumerate(self.traces):
-                self.integral_prompt.append(np.sum(wf[t0:tp]))
-        if short!=None:
-            ts = self.trigger_position+int(short/self.sample_step)
-            for i,wf in enumerate(self.traces):
-                self.integral_short.append(np.sum(wf[t0:ts]))
-        if long!=None:
-            tl = self.trigger_position+int(long/self.sample_step)
-            for i,wf in enumerate(self.traces):
-                self.integral_long.append(np.sum(wf[t0:tl]))
+        if deconv:
+            if prompt!=None:
+                tp = self.trigger_position+int(prompt/self.sample_step)
+                for i,wf in enumerate(self.deconv):
+                    self.integral_prompt.append(np.sum(wf[t0:tp]))
+            if short!=None:
+                ts = self.trigger_position+int(short/self.sample_step)
+                for i,wf in enumerate(self.deconv):
+                    self.integral_short.append(np.sum(wf[t0:ts]))
+            if long!=None:
+                tl = self.trigger_position+int(long/self.sample_step)
+                for i,wf in enumerate(self.deconv):
+                    self.integral_long.append(np.sum(wf[t0:tl]))
+        else:
+            if prompt!=None:
+                tp = self.trigger_position+int(prompt/self.sample_step)
+                for i,wf in enumerate(self.traces):
+                    self.integral_prompt.append(np.sum(wf[t0:tp]))
+            if short!=None:
+                ts = self.trigger_position+int(short/self.sample_step)
+                for i,wf in enumerate(self.traces):
+                    self.integral_short.append(np.sum(wf[t0:ts]))
+            if long!=None:
+                tl = self.trigger_position+int(long/self.sample_step)
+                for i,wf in enumerate(self.traces):
+                    self.integral_long.append(np.sum(wf[t0:tl]))
 
     def get_integral_hist(self, prompt=None, short=None, long=None):
         '''
@@ -250,15 +285,12 @@ class SiPM():
             self.famp_hist_fit = gauss_fit
         return min_bins, max_bins
 
-    def get_avgwf(self, integral_range):
+    def get_avgwf(self, indices=[]):
         self.avgwf *= self.avgwf_count
-        for i,wf in enumerate(self.traces):
-            if self.integral_long[i]<integral_range[1] and self.integral_long[i]>integral_range[0]:
-                self.avgwf_count += 1
-                self.avgwf += wf
+        for i in indices:
+            self.avgwf_count += 1
+            self.avgwf += self.traces[i]
         self.avgwf /= self.avgwf_count
-        # while self.avgwf[self.trigger_position]>1:
-        #     self.trigger_position -= 1
 
     def get_spe_avgwf(self):
         if self.traces==[]:
@@ -266,8 +298,8 @@ class SiPM():
             self.baseline_subtraction()
         self.spe_avgwf = np.zeros(self.samples)
         count = 0
-        for i,fa in enumerate(self.famp):
-            if abs(fa-self.famp_hist_fit[0][1][0]) < 2*self.famp_hist_fit[0][2][0]:
+        for i,fa in enumerate(self.famp[-self.nevents:]):
+            if abs(fa-self.famp_hist_fit[0][1][0]) < 3*self.famp_hist_fit[0][2][0]:
                 self.spe_avgwf *= count
                 self.spe_avgwf += self.traces[i,:]
                 count += 1
@@ -320,3 +352,4 @@ class SiPM():
         self.traces = []
         self.filtered_traces = []
         self.ar_filtered_traces = []
+        self.deconv = []
