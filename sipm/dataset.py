@@ -36,11 +36,11 @@ class Dataset:
     def get_waveforms_id(self, count=-1, integral_range=(0,1e4), fprompt_range=(0,1)):
         count_ = 0
         event_id = []
-        ev = 0
-        while (count==-1 or count_<count) and ev < self.ch[0].nevents:
+        ev = self.ch[0].cumulative_nevents-self.ch[0].nevents
+        while (count==-1 or count_<count) and ev < self.ch[0].cumulative_nevents:
             if self.summed_integral_pe[ev]<integral_range[1] and self.summed_integral_pe[ev]>integral_range[0]:
                 if self.fprompt[ev]<fprompt_range[1] and self.fprompt[ev]>fprompt_range[0]:
-                    event_id.append(ev)
+                    event_id.append(ev-(self.ch[0].cumulative_nevents-self.ch[0].nevents))
                     count_ += 1
             ev += 1
         return event_id
@@ -50,6 +50,6 @@ class Dataset:
         for ch in self.channels:
             self.ch[ch].clear()
             self.ch[ch].read_data(simple=True)
-            self.ch[ch].baseline_subtraction()
+            self.ch[ch].baseline_subtraction(analysis=False)
             self.ch[ch].get_avgwf(indices)
             self.ch[ch].clear()

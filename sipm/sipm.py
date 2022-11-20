@@ -42,14 +42,16 @@ class SiPM():
         self.cumulative_nevents = 0 # in case it needs to read multiple files
         self.cumulative_time = 0 # in seconds
         self.avgwf_count = 0
+        self.spe_avgwf_count = 0
         # waveforms
         self.traces = [] #raw
         self.filtered_traces = [] # band pass filtered
         self.ar_filtered_traces = []# ar filtered
         self.deconv = []#deconvolution
         self.time = [] #time array
-        self.avgwf = np.zeros(0) # overall average
-        self.spe_avgwf = None # spe waveform
+        self.avgwf = np.zeros(0) # scintillation
+        self.spe_avgwf = np.zeros(0) # spe waveform
+        self.spe_sumwf = np.zeros(0) # spe sum waveform
         self.baseline_samples = 0 # will be modified to trigger_position - 10 samples
         self.trigger_position = 0
         # baseline
@@ -121,6 +123,8 @@ class SiPM():
         self.time = np.arange(0,self.sample_step*self.samples,self.sample_step)
         if self.avgwf.shape[0]==0:
             self.avgwf = np.zeros(self.samples)
+        if self.spe_sumwf.shape[0]==0:
+            self.spe_sumwf = np.zeros(self.samples)
         if not simple:
             self.filtered_traces = np.zeros(np.shape(self.traces))
             self.ar_filtered_traces = np.zeros(np.shape(self.traces))
@@ -146,17 +150,18 @@ class SiPM():
         self.clear()
         return waveforms
 
-    def baseline_subtraction(self):
+    def baseline_subtraction(self, analysis=True):
         for ii,x in enumerate(self.traces):
             baseline = np.mean(self.traces[ii][:self.baseline_samples])
-            self.baseline_mean.append(baseline)
-            self.baseline_median.append(np.median(self.traces[ii][:self.baseline_samples]))
-            self.baseline_std.append(np.std(self.traces[ii][:self.baseline_samples]))
-            self.baseline_min.append(np.min(self.traces[ii][:self.baseline_samples]))
-            self.baseline_max.append(np.max(self.traces[ii][:self.baseline_samples]))
             self.traces[ii] -= baseline
             self.traces[ii] *= self.pol
-
+            if analysis:
+                self.baseline_mean.append(baseline)
+                self.baseline_median.append(np.median(self.traces[ii][:self.baseline_samples]))
+                self.baseline_std.append(np.std(self.traces[ii][:self.baseline_samples]))
+                self.baseline_min.append(np.min(self.traces[ii][:self.baseline_samples]))
+                self.baseline_max.append(np.max(self.traces[ii][:self.baseline_samples]))
+            
     def bandpass_filter(self, low, high, order=3):
         if not self.filt_pars:
             b, a = signal.butter(order, [low,high], analog=False, fs=self.sampling, btype='band')
@@ -292,18 +297,15 @@ class SiPM():
             self.avgwf += self.traces[i]
         self.avgwf /= self.avgwf_count
 
+    def get_spe_sumwf(self, famp_range=(0,0)):
+        for i,wf_filt in enumerate(self.ar_filtered_traces):
+            fa = np.max(wf_filt[self.trigger_position-15:self.trigger_position+20])
+            if fa>famp_range[0] and fa<famp_range[1]:
+                self.spe_sumwf += self.traces[i,:]
+                self.spe_avgwf_count += 1
+                
     def get_spe_avgwf(self):
-        if self.traces==[]:
-            self.read_data(header=True,simple=True)
-            self.baseline_subtraction()
-        self.spe_avgwf = np.zeros(self.samples)
-        count = 0
-        for i,fa in enumerate(self.famp[-self.nevents:]):
-            if abs(fa-self.famp_hist_fit[0][1][0]) < 3*self.famp_hist_fit[0][2][0]:
-                self.spe_avgwf *= count
-                self.spe_avgwf += self.traces[i,:]
-                count += 1
-                self.spe_avgwf /= count
+        self.spe_avgwf = self.spe_sumwf/self.spe_avgwf_count
 
     def get_afterpulse_charge(self, nsigma=3, bin=[-300, 6000, 500]):
         self.ap_charge = []
