@@ -8,7 +8,6 @@ class Dataset:
     def __init__(self,  path, pol=1, channels=range(4), spe=[], root_file_name=None):
         self.path = path
         self.channels = channels
-        self.samples = samples
         self.pol = pol
         self.ch = self.InitializeChannels()
         self.summed_integral_pe = []
@@ -35,7 +34,7 @@ class Dataset:
     def InitializeChannels(self):
         channels = []
         for i in self.channels:
-            new_channel = sipm.SiPM(id=i, pol=self.pol, path=self.path, samples=self.samples)
+            new_channel = sipm.SiPM(id=i, pol=self.pol, path=self.path)
             channels.append(new_channel)
         return channels
 
@@ -74,7 +73,7 @@ class Dataset:
 
     def write_tree(self):
         self.root_file.cd()
-        self.root_tree.Write("tr")
+        self.root_tree.Write("tree")
         self.root_file.Close()
 
     def get_summed_integral_pe(self):

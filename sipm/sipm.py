@@ -28,7 +28,7 @@ def pulse_jitter(t, a, tau, sigma, t0):
     return a*np.exp(sigma**2/2/tau**2)*np.exp(-(t-t0)/tau)*(1+erf((t-t0-sigma**2/tau)/sigma/np.sqrt(2)))/2
 
 class SiPM():
-    def __init__(self, id, pol, path, samples, root_file_name=None):
+    def __init__(self, id, pol, path, root_file_name=None):
         # basic information
         self.path = path
         self.file = None
@@ -38,7 +38,7 @@ class SiPM():
         self.sample_step = 1./float(self.sampling)*1e6 # in us
         self.header = [0]*6
         self.timestamp = []
-        self.samples = samples #waveform length
+        self.samples = 0 #waveform length
         self.nevents = 0
         self.acquisition_time = 0 # in seconds
         self.cumulative_nevents = 0 # in case it needs to read multiple files
