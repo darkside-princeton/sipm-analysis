@@ -101,7 +101,7 @@ class SiPM():
         file = open(self.file, 'rb')
         self.acquisition_time = 0
         if header:
-            for i in range(50000):
+            for i in range(100000):
                 self.header = np.fromfile(file, dtype=np.dtype('I'), count=6)
                 if len(self.header) == 0:
                     break
