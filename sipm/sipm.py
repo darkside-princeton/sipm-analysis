@@ -358,21 +358,16 @@ class SiPM():
         self.deconv = []
     
     def clear_all(self):
+        self.clear()
         # basic information
         self.timestamp = []
         self.nevents = 0
         self.acquisition_time = 0 # in seconds
-        self.cumulative_nevents = 0 # in case it needs to read multiple files
-        self.cumulative_time = 0 # in seconds
         # waveforms
         self.traces = [] #raw
         self.filtered_traces = [] # band pass filtered
         self.ar_filtered_traces = []# ar filtered
         self.deconv = [] #deconvolution
-        self.time = [] #time array
-        self.avgwf = np.zeros(0) # scintillation
-        self.spe_avgwf = np.zeros(0) # spe waveform
-        self.spe_sumwf = np.zeros(0) # spe sum waveform
         # baseline
         self.baseline_avg = []
         self.baseline_med = []

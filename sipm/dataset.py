@@ -33,7 +33,8 @@ class Dataset:
         #all channels
         self.sum_pe = array('f', [0])
         self.f_prompt = array('f', [0])
-        self.initialize_tree()
+        if mode=='calibration' or mode=='scintillation':
+            self.initialize_tree()
         
     def InitializeChannels(self):
         channels = []
