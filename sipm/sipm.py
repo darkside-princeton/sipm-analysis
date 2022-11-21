@@ -57,15 +57,11 @@ class SiPM():
         self.baseline_samples = 0 # will be modified to trigger_position - 10 samples
         self.trigger_position = 0
         # baseline
-        self.baseline_mean = []
-        self.baseline_median = []
+        self.baseline_avg = []
+        self.baseline_med = []
         self.baseline_std = []
-        self.baseline_min = []
-        self.baseline_max = []
-        # output root file
-        self.root_file_name = root_file_name
-        self.root_file = None
-        self.root_tree = None
+        self.acquisition_max = []
+        self.acquisition_min = []
         # band pass filter
         self.filt_pars = None
         # histograms
@@ -99,7 +95,6 @@ class SiPM():
         self.ap_charge = [] # list of list of long integral for each famp pe peak
         self.ap_charge_hist = [] # list of long integral histogram for each famp pe peak
         self.ap_charge_hist_bin = []
-        
     
     def read_data(self, header=True, simple=False, verbose=False):
         self.file = glob.glob(self.path+"wave{}.dat".format(self.id))[0]
@@ -146,17 +141,6 @@ class SiPM():
                 for k in range(10):
                     print(self.traces[k,:])
 
-    def fill_tree(self):
-        if self.root_file_name==None:
-            print('No root file name provided. Use default name tree.root')
-            self.root_file_name = 'tree.root'
-        self.root_file = ROOT.TFile(self.root_file_name, 'recreate')
-        self.root_tree = ROOT.TTree('tree', 'tree')
-        # Define variables
-        
-        # Set branches
-        self.root_tree.Branch
-
     def get_waveforms(self, event_id=[], header=True):
         if self.traces==[]:
             self.read_data(header=header, simple=True)
@@ -169,16 +153,16 @@ class SiPM():
 
     def baseline_subtraction(self, analysis=True):
         for ii,x in enumerate(self.traces):
+            if analysis:
+                self.baseline_avg.append(np.mean(self.traces[ii][:self.baseline_samples]))
+                self.baseline_med.append(np.median(self.traces[ii][:self.baseline_samples]))
+                self.baseline_std.append(np.std(self.traces[ii][:self.baseline_samples]))
+                self.acquisition_max.append(np.max(self.traces[ii][:]))
+                self.acquisition_min.append(np.min(self.traces[ii][:]))
             baseline = np.mean(self.traces[ii][:self.baseline_samples])
             self.traces[ii] -= baseline
             self.traces[ii] *= self.pol
-            if analysis:
-                self.baseline_mean.append(baseline)
-                self.baseline_median.append(np.median(self.traces[ii][:self.baseline_samples]))
-                self.baseline_std.append(np.std(self.traces[ii][:self.baseline_samples]))
-                self.baseline_min.append(np.min(self.traces[ii][:self.baseline_samples]))
-                self.baseline_max.append(np.max(self.traces[ii][:self.baseline_samples]))
-            
+                        
     def bandpass_filter(self, low, high, order=3):
         if not self.filt_pars:
             b, a = signal.butter(order, [low,high], analog=False, fs=self.sampling, btype='band')
@@ -372,3 +356,31 @@ class SiPM():
         self.filtered_traces = []
         self.ar_filtered_traces = []
         self.deconv = []
+    
+    def clear_all(self):
+        # basic information
+        self.timestamp = []
+        self.nevents = 0
+        self.acquisition_time = 0 # in seconds
+        self.cumulative_nevents = 0 # in case it needs to read multiple files
+        self.cumulative_time = 0 # in seconds
+        # waveforms
+        self.traces = [] #raw
+        self.filtered_traces = [] # band pass filtered
+        self.ar_filtered_traces = []# ar filtered
+        self.deconv = [] #deconvolution
+        self.time = [] #time array
+        self.avgwf = np.zeros(0) # scintillation
+        self.spe_avgwf = np.zeros(0) # spe waveform
+        self.spe_sumwf = np.zeros(0) # spe sum waveform
+        # baseline
+        self.baseline_avg = []
+        self.baseline_med = []
+        self.baseline_std = []
+        self.acquisition_max = []
+        self.acquisition_min = []
+        # histograms
+        self.famp = []
+        self.integral_prompt = []
+        self.integral_short = []
+        self.integral_long = []
