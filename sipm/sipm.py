@@ -5,6 +5,8 @@ from scipy.signal import find_peaks
 from scipy.optimize import curve_fit
 from scipy.special import gamma, erf
 from scipy.fft import fft, ifft
+import ROOT
+from array import array
 
 def gauss(x,N,mu,sigma):
     return N*np.exp(-(x-mu)**2/(2*sigma**2))/np.sqrt(2*np.pi)/sigma
@@ -26,7 +28,7 @@ def pulse_jitter(t, a, tau, sigma, t0):
     return a*np.exp(sigma**2/2/tau**2)*np.exp(-(t-t0)/tau)*(1+erf((t-t0-sigma**2/tau)/sigma/np.sqrt(2)))/2
 
 class SiPM():
-    def __init__(self, id, pol, path, samples):
+    def __init__(self, id, pol, path, samples, root_file_name=None):
         # basic information
         self.path = path
         self.file = None
@@ -47,7 +49,7 @@ class SiPM():
         self.traces = [] #raw
         self.filtered_traces = [] # band pass filtered
         self.ar_filtered_traces = []# ar filtered
-        self.deconv = []#deconvolution
+        self.deconv = [] #deconvolution
         self.time = [] #time array
         self.avgwf = np.zeros(0) # scintillation
         self.spe_avgwf = np.zeros(0) # spe waveform
@@ -60,6 +62,10 @@ class SiPM():
         self.baseline_std = []
         self.baseline_min = []
         self.baseline_max = []
+        # output root file
+        self.root_file_name = root_file_name
+        self.root_file = None
+        self.root_tree = None
         # band pass filter
         self.filt_pars = None
         # histograms
@@ -139,6 +145,17 @@ class SiPM():
                 print('CUMULATIVE WAVEFORMS = {}'.format(self.cumulative_nevents))
                 for k in range(10):
                     print(self.traces[k,:])
+
+    def fill_tree(self):
+        if self.root_file_name==None:
+            print('No root file name provided. Use default name tree.root')
+            self.root_file_name = 'tree.root'
+        self.root_file = ROOT.TFile(self.root_file_name, 'recreate')
+        self.root_tree = ROOT.TTree('tree', 'tree')
+        # Define variables
+        
+        # Set branches
+        self.root_tree.Branch
 
     def get_waveforms(self, event_id=[], header=True):
         if self.traces==[]:

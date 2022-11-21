@@ -24,7 +24,9 @@ class Dataset:
     def get_summed_integral_pe(self):
         self.summed_integral_pe = np.zeros(self.ch[0].cumulative_nevents)
         for i in self.channels:
-            print('ch {} nevents {} charge entries {}'.format(i,self.ch[i].cumulative_nevents, np.shape(self.ch[i].integral_long)[0]))
+#             print('ch {} nevents {} charge entries {}'.format(i,self.ch[i].cumulative_nevents, np.shape(self.ch[i].integral_long)[0]))
+#             print(np.shape(self.ch[i].integral_long))
+#             print(np.shape(self.gain[i]))
             self.summed_integral_pe += np.array(self.ch[i].integral_long)/self.gain[i]
 
     def get_fprompt(self):
