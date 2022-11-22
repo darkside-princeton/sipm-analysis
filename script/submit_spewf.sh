@@ -15,7 +15,7 @@
 
 #SBATCH --time=01:30:00
 
-#SBATCH --array=0-10
+#SBATCH --array=0-9
 
 module load anaconda3/2021.11
 conda activate ds-pu

@@ -73,7 +73,7 @@ if __name__ == '__main__':
             data.ch[ch].clear_all()
     for ch in range(4):
         data.ch[ch].get_spe_avgwf()
-        print('{} waveforms averaged'.format(data.ch[ch].spe_avgwf_count))
+        print('{} waveforms averaged'.format(data.ch[ch].spe_sumwf_count))
         gSPE = ROOT.TGraph(int(data.ch[ch].samples), array('f', list(data.ch[ch].time)), array('f', list(data.ch[ch].spe_avgwf)))
         gSPE.Write('gSPE_ch{}'.format(ch))
     file.Close()
