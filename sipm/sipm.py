@@ -43,17 +43,18 @@ class SiPM():
         self.acquisition_time = 0 # in seconds
         self.cumulative_nevents = 0 # in case it needs to read multiple files
         self.cumulative_time = 0 # in seconds
-        self.avgwf_count = 0
-        self.spe_avgwf_count = 0
         # waveforms
         self.traces = [] #raw
         self.filtered_traces = [] # band pass filtered
         self.ar_filtered_traces = []# ar filtered
         self.deconv = [] #deconvolution
         self.time = [] #time array
-        self.avgwf = np.zeros(0) # scintillation
-        self.spe_avgwf = np.zeros(0) # spe waveform
-        self.spe_sumwf = np.zeros(0) # spe sum waveform
+        self.scint_sumwf = np.array([]) # scintillation summed waveform
+        self.scint_avgwf = np.array([]) # scintillation averaged waveform
+        self.scint_sumwf_count = 0
+        self.spe_avgwf = np.array([]) # spe averaged waveform
+        self.spe_sumwf = np.array([]) # spe summed waveform
+        self.spe_sumwf_count = 0
         self.baseline_samples = 0 # will be modified to trigger_position - 10 samples
         self.trigger_position = 0
         # baseline
@@ -122,8 +123,8 @@ class SiPM():
         self.traces = np.array(self.traces)
         self.traces = self.traces.reshape((-1,self.samples)).astype(float)
         self.time = np.arange(0,self.sample_step*self.samples,self.sample_step)
-        if self.avgwf.shape[0]==0:
-            self.avgwf = np.zeros(self.samples)
+        if self.scint_sumwf.shape[0]==0:
+            self.scint_sumwf = np.zeros(self.samples)
         if self.spe_sumwf.shape[0]==0:
             self.spe_sumwf = np.zeros(self.samples)
         if not simple:
@@ -291,22 +292,23 @@ class SiPM():
             self.famp_hist_fit = gauss_fit
         return min_bins, max_bins
 
-    def get_avgwf(self, indices=[]):
-        self.avgwf *= self.avgwf_count
+    def get_scint_sumwf(self, indices=[]):
         for i in indices:
-            self.avgwf_count += 1
-            self.avgwf += self.traces[i]
-        self.avgwf /= self.avgwf_count
+            self.scint_sumwf += self.traces[i]
+            self.scint_sumwf_count += 1
+
+    def get_scint_avgwf(self):
+        self.scint_avgwf = self.scint_sumwf/self.scint_sumwf_count
 
     def get_spe_sumwf(self, famp_range=(0,0)):
         for i,wf_filt in enumerate(self.ar_filtered_traces):
             fa = np.max(wf_filt[self.trigger_position-15:self.trigger_position+20])
             if fa>famp_range[0] and fa<famp_range[1]:
                 self.spe_sumwf += self.traces[i,:]
-                self.spe_avgwf_count += 1
+                self.spe_sumwf_count += 1
                 
     def get_spe_avgwf(self):
-        self.spe_avgwf = self.spe_sumwf/self.spe_avgwf_count
+        self.spe_avgwf = self.spe_sumwf/self.spe_sumwf_count
 
     def get_afterpulse_charge(self, nsigma=3, bin=[-300, 6000, 500]):
         self.ap_charge = []

@@ -8,12 +8,11 @@ import os
 from array import array
 
 if __name__ == '__main__':
-    #usage: python root_spewf.py <data directory> <number of subdirectories> <output file name> <A1> <sigma1>
+    #usage: python root_spewf.py <data directory> <number of subdirectories> <output file name> <calibration file>
     direc = sys.argv[1]
     nsubdir = int(sys.argv[2])
     outfile = sys.argv[3]
-    A1pe = float(sys.argv[4])
-    sigma1pe = float(sys.argv[5])
+    calib_filt = sys.argv[4]
 
     file = ROOT.TFile('{}.root'.format(outfile), 'recreate')
     data = ds.Dataset('', mode='spewf', pol=-1, channels=range(4), root_file_name='{}.root'.format(outfile))

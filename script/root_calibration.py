@@ -7,15 +7,35 @@ import sys
 import os
 
 if __name__ == '__main__':
-    #usage: python root_calibration.py <data directory> <number of subdirectories> <output file name>
-    direc = sys.argv[1]
-    nsubdir = int(sys.argv[2])
-    outfile = sys.argv[3]
+    #usage: python root_calibration.py index
+    index = int(sys.argv[1])
+    data_dir = '/scratch/gpfs/GALBIATI/data/sipm/reflector_studies/'
+    direc = [   '2022-11-01/2022-11-01_volt_61_pos_top_light_laser_coinc_none_cond_calibration',
+                '2022-11-01/2022-11-01_volt_63_pos_top_light_laser_coinc_none_cond_calibration',
+                '2022-11-01/2022-11-01_volt_65_pos_top_light_laser_coinc_none_cond_calibration',
+                '2022-11-01/2022-11-01_volt_67_pos_top_light_laser_coinc_none_cond_calibration',
+                '2022-11-01/2022-11-01_volt_69_pos_top_light_laser_coinc_none_cond_calibration',
+                '2022-11-01/2022-11-01_volt_61_pos_bottom_light_laser_coinc_none_cond_calibration',
+                '2022-11-01/2022-11-01_volt_63_pos_bottom_light_laser_coinc_none_cond_calibration',
+                '2022-11-01/2022-11-01_volt_65_pos_bottom_light_laser_coinc_none_cond_calibration',
+                '2022-11-01/2022-11-01_volt_67_pos_bottom_light_laser_coinc_none_cond_calibration',
+                '2022-11-01/2022-11-01_volt_69_pos_bottom_light_laser_coinc_none_cond_calibration']
+    nsubdir = [1,1,1,1,1,1,1,1,1,1]
+    outfile = [ 'calibration_61V_top',
+                'calibration_63V_top',
+                'calibration_65V_top',
+                'calibration_67V_top',
+                'calibration_69V_top',
+                'calibration_61V_bottom',
+                'calibration_63V_bottom',
+                'calibration_65V_bottom',
+                'calibration_67V_bottom',
+                'calibration_69V_bottom']
 
-    data = ds.Dataset('', mode='calibration', pol=-1, channels=range(4), root_file_name='{}.root'.format(outfile))
-    for i in range(nsubdir):
+    data = ds.Dataset('', mode='calibration', pol=-1, channels=range(4), root_file_name='{}.root'.format(outfile[index]))
+    for i in range(nsubdir[index]):
         # subdir = '{}{}/'.format(direc, i)
-        subdir = direc
+        subdir = '{}{}/'.format(data_dir, direc[index])
         print(subdir)
         for ch in range(4):    
             data.ch[ch].path = subdir

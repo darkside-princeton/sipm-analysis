@@ -78,8 +78,8 @@ class Dataset:
                 if self.mode=='calibration':
                     self.fil_amp[ch] = self.ch[ch].famp[ev]
                 self.int_long[ch] = self.ch[ch].integral_long[ev]
-                sum_pe_ += self.int_long[ch]/self.gain[ch]
                 if self.mode=='scintillation':
+                    sum_pe_ += self.int_long[ch]/self.gain[ch]
                     self.int_prompt[ch] = self.ch[ch].integral_prompt[ev]
                     sum_prompt_pe_ += self.int_prompt[ch]/self.gain[ch]
             if self.mode=='scintillation':
@@ -109,25 +109,25 @@ class Dataset:
             sum_pe += np.array(self.ch[i].integral_long)/self.gain[i]
         self.fprompt = np.concatenate((sum_prompt_pe/sum_pe, self.fprompt))
 
-    def get_waveforms_id(self, count=-1, integral_range=(0,1e4), fprompt_range=(0,1)):
+    def get_waveforms_id(self, count=-1, pe_range=(0,1e4), fprompt_range=(0,1)):
         count_ = 0
         event_id = []
-        ev = self.ch[0].cumulative_nevents-self.ch[0].nevents
-        while (count==-1 or count_<count) and ev < self.ch[0].cumulative_nevents:
-            if self.summed_integral_pe[ev]<integral_range[1] and self.summed_integral_pe[ev]>integral_range[0]:
+        ev = 0
+        while (count==-1 or count_<count) and ev < self.ch[0].nevents:
+            if self.summed_integral_pe[ev]<pe_range[1] and self.summed_integral_pe[ev]>pe_range[0]:
                 if self.fprompt[ev]<fprompt_range[1] and self.fprompt[ev]>fprompt_range[0]:
-                    event_id.append(ev-(self.ch[0].cumulative_nevents-self.ch[0].nevents))
+                    event_id.append(ev)
                     count_ += 1
             ev += 1
         return event_id
 
-    def get_avgwf_all(self, count=-1, integral_range=(0,1e4), fprompt_range=(0,1)):
-        indices = self.get_waveforms_id(count, integral_range, fprompt_range)
+    def get_avgwf_all(self, count=-1, pe_range=(0,1e4), fprompt_range=(0,1)):
+        indices = self.get_waveforms_id(count, pe_range, fprompt_range)
         for ch in self.channels:
             self.ch[ch].clear()
             self.ch[ch].read_data(simple=True)
             self.ch[ch].baseline_subtraction(analysis=False)
-            self.ch[ch].get_avgwf(indices)
+            self.ch[ch].get_scint_sumwf(indices)
             self.ch[ch].clear()
 
     def clear(self):
