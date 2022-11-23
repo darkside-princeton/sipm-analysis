@@ -255,7 +255,7 @@ class SiPM():
             print('no option called {}'.format(hist))
             print('available options: integral_short/integral_long/famp')
 
-    def fit_histo_peaks(self, hist):
+    def fit_histo_peaks(self, hist, bad=False):
         histo = None
         histo_bins = None
         if hist=='integral_short':
@@ -279,7 +279,11 @@ class SiPM():
             peak_bin = peak_bin + self.thre
             pe_width_bin = int(self.pdict['widths'][ip])
             pe_width_x = bin_width*pe_width_bin
-            min_bins.append(peak_bin-pe_width_bin)
+            if not bad:
+                min_bins.append(peak_bin-pe_width_bin)
+            else:
+                print('bad channel - change fit range')
+                min_bins.append(peak_bin-int(1.5*pe_width_bin))
             max_bins.append(peak_bin+pe_width_bin)
             peak_x = histo_bins[0] + bin_width*peak_bin
             popt,pcov = curve_fit(gauss, histo_bins[min_bins[ip]:max_bins[ip]], histo[min_bins[ip]:max_bins[ip]], p0=[histo[peak_bin], peak_x, pe_width_x], sigma=np.sqrt(histo[min_bins[ip]:max_bins[ip]]), maxfev=10000)
@@ -303,7 +307,7 @@ class SiPM():
     def get_spe_sumwf(self, famp_range=(0,0)):
         for i,wf_filt in enumerate(self.ar_filtered_traces):
             fa = np.max(wf_filt[self.trigger_position-15:self.trigger_position+20])
-            if fa>famp_range[0] and fa<famp_range[1]:
+            if fa>famp_range[0] and fa<famp_range[1] and  self.baseline_std[i]<2.5:
                 self.spe_sumwf += self.traces[i,:]
                 self.spe_sumwf_count += 1
                 
@@ -316,8 +320,18 @@ class SiPM():
         self.ap_charge_hist_bin = []
         for pe in range(len(self.famp_hist_fit)):
             ap_charge = []
+            if pe==0:
+                min_fa = 0.5*self.famp_hist_fit[pe][1][0]
+            else:
+                min_fa = 0.5*(self.famp_hist_fit[pe][1][0]+self.famp_hist_fit[pe][1][0])
+            if pe==len(self.famp_hist_fit)-1:
+                max_fa = 1.5*self.famp_hist_fit[pe][1][0]-0.5*self.famp_hist_fit[pe-1][1][0]
+            else:
+                max_fa = 0.5*(self.famp_hist_fit[pe+1][1][0]+self.famp_hist_fit[pe][1][0])
+
             for i,fa in enumerate(self.famp):
-                if abs(fa-self.famp_hist_fit[pe][1][0]) < nsigma*self.famp_hist_fit[pe][2][0]:
+                # if abs(fa-self.famp_hist_fit[pe][1][0]) < nsigma*self.famp_hist_fit[pe][2][0]:
+                if fa<max_fa and fa>min_fa:
                     ap_charge.append(self.integral_long[i])
             ap_charge_hist, ap_charge_hist_bin = np.histogram(ap_charge, bins=bin[2], range=(bin[0],bin[1]))
             self.ap_charge.append(ap_charge)
