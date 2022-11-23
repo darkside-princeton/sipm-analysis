@@ -38,8 +38,8 @@ if __name__ == '__main__':
     #####
     bias = [63,65,67,69,71]
     volt = bias[index%5]
-    A1pe = []
-    sigma1pe = []
+    A1min = []
+    A1max = []
     with open('../calibration_1122_{}V.csv'.format(volt)) as f:
         r = csv.reader(f)
         line_count = 0
@@ -47,15 +47,15 @@ if __name__ == '__main__':
             if line_count>0:
                 if index//5==0:
                     if line_count<=4:
-                        A1pe.append(float(row[1]))
-                        sigma1pe.append(float(row[2]))
+                        A1min.append(float(row[1]))
+                        A1max.append(float(row[2]))
                 else:
                     if line_count>4:
-                        A1pe.append(float(row[1]))
-                        sigma1pe.append(float(row[2]))
+                        A1min.append(float(row[1]))
+                        A1max.append(float(row[2]))
             line_count += 1
     for ch in range(4):
-        print('Ch{} A1pe={:.3f} sigma1pe={:.3f}'.format(ch, A1pe[ch], sigma1pe[ch]))
+        print('Ch{} A1min={:.3f} A1max={:.3f}'.format(ch, A1min[ch], A1max[ch]))
     
     file = ROOT.TFile('../root/{}.root'.format(outfile[index]), 'recreate')
     data = ds.Dataset('', mode='spewf', pol=-1, channels=range(4))
@@ -68,7 +68,7 @@ if __name__ == '__main__':
             data.ch[ch].baseline_subtraction(analysis=True)
             data.ch[ch].ar_filter(tau=20)
             data.ch[ch].get_famp()
-            data.ch[ch].get_spe_sumwf(famp_range=(A1pe[ch]-2*sigma1pe[ch], A1pe[ch]+2*sigma1pe[ch]))
+            data.ch[ch].get_spe_sumwf(famp_range=(A1min[ch], A1max[ch]))
             data.ch[ch].clear_all()
     for ch in range(4):
         data.ch[ch].get_spe_avgwf()
