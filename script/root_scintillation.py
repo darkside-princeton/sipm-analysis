@@ -34,26 +34,26 @@ if __name__ == '__main__':
                 '2022-11-18/2022-11-18_volt_71_pos_bottom_light_scintillation_coinc_000_cond_no_gamma/'
             ]
     nsubdir = [20]*20
-    outfile = [ 'gamma_63V_top',
-                'gamma_65V_top',
-                'gamma_67V_top',
-                'gamma_69V_top',
-                'gamma_71V_top',
-                'gamma_63V_bottom',
-                'gamma_65V_bottom',
-                'gamma_67V_bottom',
-                'gamma_69V_bottom',
-                'gamma_71V_bottom',
-                'backgrounds_63V_top',
-                'backgrounds_65V_top',
-                'backgrounds_67V_top',
-                'backgrounds_69V_top',
-                'backgrounds_71V_top',
-                'backgrounds_63V_bottom',
-                'backgrounds_65V_bottom',
-                'backgrounds_67V_bottom',
-                'backgrounds_69V_bottom',
-                'backgrounds_71V_bottom'
+    outfile = [ 'gamma_1120_63V_top',
+                'gamma_1120_65V_top',
+                'gamma_1120_67V_top',
+                'gamma_1120_69V_top',
+                'gamma_1120_71V_top',
+                'gamma_1120_63V_bottom',
+                'gamma_1120_65V_bottom',
+                'gamma_1120_67V_bottom',
+                'gamma_1120_69V_bottom',
+                'gamma_1120_71V_bottom',
+                'backgrounds_1118_63V_top',
+                'backgrounds_1118_65V_top',
+                'backgrounds_1118_67V_top',
+                'backgrounds_1118_69V_top',
+                'backgrounds_1118_71V_top',
+                'backgrounds_1118_63V_bottom',
+                'backgrounds_1118_65V_bottom',
+                'backgrounds_1118_67V_bottom',
+                'backgrounds_1118_69V_bottom',
+                'backgrounds_1118_71V_bottom'
             ]
     ##########
     # SPE gain is preliminary. Should use Qavg/(1-p) obtained from calibration analysis!
@@ -96,13 +96,14 @@ if __name__ == '__main__':
             data.ch[ch].clear()
         data.get_summed_integral_pe()
         data.get_fprompt()
-        data.get_avgwf_all(pe_range=(50,1e4), fprompt_range=(0.2,0.4))
+        data.get_avgwf_all(pe_range=(50,5000), fprompt_range=(0.1,0.4))
         data.fill_tree()
         for ch in range(4):
             data.ch[ch].clear_all()
         data.clear()
     for ch in range(4):
         data.ch[ch].get_scint_avgwf()
+        print('Ch{} {} waveforms averaged'.format(ch, data.ch[ch].scint_sumwf_count))
         gScintWf = ROOT.TGraph(int(data.ch[ch].samples), array('f', list(data.ch[ch].time)), array('f', list(data.ch[ch].scint_avgwf)))
         gScintWf.Write('gScintWf_ch{}'.format(ch))
     data.write_tree()

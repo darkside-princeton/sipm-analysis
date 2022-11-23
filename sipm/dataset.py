@@ -116,8 +116,12 @@ class Dataset:
         while (count==-1 or count_<count) and ev < self.ch[0].nevents:
             if self.summed_integral_pe[ev]<pe_range[1] and self.summed_integral_pe[ev]>pe_range[0]:
                 if self.fprompt[ev]<fprompt_range[1] and self.fprompt[ev]>fprompt_range[0]:
-                    event_id.append(ev)
-                    count_ += 1
+                    bsl_cut = True
+                    for ch in self.ch:
+                        bsl_cut = bsl_cut and ch.baseline_std[ev]<2.5
+                    if bsl_cut:
+                        event_id.append(ev)
+                        count_ += 1
             ev += 1
         return event_id
 
