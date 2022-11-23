@@ -1,4 +1,4 @@
-name: ds-pu
+name: sipm
 channels:
   - conda-forge
   - defaults

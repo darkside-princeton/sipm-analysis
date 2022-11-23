@@ -6,7 +6,7 @@ from scipy import signal
 from scipy.fft import fft
 from scipy.optimize import curve_fit
 
-import sipm.functions as func
+import sipm.util.functions as func
 
 from BaselineRemoval import BaselineRemoval
 
@@ -39,6 +39,7 @@ class SiPM():
             Number of waveforms to read from each wavedump file (default is all (1e9))
         """
         for f in sorted(self.files):
+            print(f)
             file = open(f, 'rb')
             if header:
                 for i in range(1000000):
@@ -51,10 +52,10 @@ class SiPM():
                     self.traces.append(trace)
             else:
                 self.traces = np.fromfile(file, dtype=np.dtype('<H'), count=-1)
+                cutoff = -len(self.traces)%self.samples
+                self.traces = self.traces[:cutoff].reshape((-1,self.samples)).astype(float)
             file.close()
-
-        self.traces = np.array(self.traces)
-        self.traces = self.traces.reshape((-1,self.samples)).astype(float)
+        self.traces = np.array(self.traces).astype(float)     
         self.time = np.arange(0,self.sample_step*self.samples,self.sample_step)
 
     def baseline_subtraction(self, samples=500):
