@@ -65,7 +65,7 @@ if __name__ == '__main__':
     volt = bias[index%5]
     spe_gain = []
     try:
-        with open('../calibration_{}V.csv'.format(volt)) as f:
+        with open('../calibration_1122_{}V.csv'.format(volt)) as f:
             r = csv.reader(f)
             line_count = 0
             for row in r:
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     for ch in range(4):
         print('Ch{} spe_gain=[{:.3f},{:.3f},{:.3f},{:.3f}]'.format(ch, *spe_gain))
 
-    data = ds.Dataset('', mode='scintillation', spe=spe_gain, pol=-1, channels=range(4), root_file_name='{}.root'.format(outfile[index]))
+    data = ds.Dataset('', mode='scintillation', spe=spe_gain, pol=-1, channels=range(4), root_file_name='../root/{}.root'.format(outfile[index]))
     for i in range(nsubdir[index]):
         subdir = '{}{}{}/'.format(data_dir, direc[index], i)
         print(subdir)
