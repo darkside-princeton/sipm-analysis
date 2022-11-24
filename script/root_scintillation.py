@@ -96,7 +96,7 @@ if __name__ == '__main__':
             data.ch[ch].clear()
         data.get_summed_integral_pe()
         data.get_fprompt()
-        data.get_avgwf_all(pe_range=(50,5000), fprompt_range=(0.1,0.4))
+        data.get_avgwf_all(pe_range=(50,5000), fprompt_range=(0.1,1))
         data.fill_tree()
         for ch in range(4):
             data.ch[ch].clear_all()
