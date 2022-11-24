@@ -3,6 +3,8 @@ import pandas as pd
 import re
 import pwd
 import os
+import time
+import numpy as np
 
 class IO():
     """Class for handling the saving of high level variables form the SiPM analysis.
@@ -35,7 +37,7 @@ class IO():
         indices = [index.start() for index in indices_object]
         return filename[indices[0]-4:indices[1]+3]
 
-    def get_tag(self,path):
+    def get_metadata(self,path):
         self.tag_list = ['volt', 'pos', 'light', 'coinc', 'cond']
         tag_dict = {}
         for tag in self.tag_list:
@@ -50,26 +52,37 @@ class IO():
         return tag_dict
     
     def save(self):
+
+        if not os.path.isdir(self.scratch):
+            os.makedirs(f"{self.scratch}")
+
         for i in self.d.channels:
-            store = pd.HDFStore("test1.h5")
             data = {} 
-            data['amplitude'] = d.ch[i].peak
-            data['integral'] = d.ch[i].integral
-            data['avg_waveform'] = np.mean(d.ch[i].traces, axis=0)
-            data['time'] = d.ch[i].time
+            data['amplitude'] = self.d.ch[i].peak
+            data['integral'] = self.d.ch[i].integral
+            data['avg_waveform'] = np.mean(self.d.ch[i].traces, axis=0)
+            data['time'] = self.d.ch[i].time
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
 
             metadata = self.get_metadata(self.filename)
-            # if f"/{metadata['volt']}/{i}" in store.keys():
-            #     print("yes")
-            #     store.append(f"{metadata['volt']}/{i}", df)
-            # else:
-            store.put(f"{metadata['volt']}/{i}", df, format='t', append=True, data_columns=True)
-            store.get_storer(f'65/{i}').attrs.metadata = metadata
-            store.close()
-            
-            # df.attrs = {"volt": "65"}
-            # df.to_hdf('test.h5', key=f'65/{i}')
+
+            tag = ""
+            for x,y in metadata.items():
+                tag += f"_{x}_{y}"
+
+            counter = 0
+            while True:
+                if counter > 10:
+                    break
+                try:
+                    store = pd.HDFStore(f"{self.scratch}/{self.date}{tag}.h5")
+                    store.put(f"{metadata['volt']}/{i}", df, format='t', append=True, data_columns=True)
+                    store.get_storer(f"{metadata['volt']}/{i}").attrs.metadata = metadata
+                    store.close()
+                    break
+                except:
+                    time.sleep(np.random.randint(0,10))
+                    counter += 1
 
 
 
