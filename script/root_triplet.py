@@ -69,6 +69,12 @@ if __name__ == '__main__':
     for ch in range(4):
         print('Ch{} spe_gain=[{:.3f},{:.3f},{:.3f},{:.3f}]'.format(ch, *spe_gain))
 
+    pe_cut = 0
+    if index<23:
+        pe_cut = 50
+    else:
+        pe_cut = 300
+
     data = ds.Dataset('', mode='scintillation', spe=spe_gain, pol=-1, channels=range(4), root_file_name='../root/{}.root'.format(files[index][2]))
     for i in range(files[index][1]):
         if files[index][1]==1:
@@ -84,7 +90,7 @@ if __name__ == '__main__':
             data.ch[ch].clear()
         data.get_summed_integral_pe()
         data.get_fprompt()
-        data.get_avgwf_all(pe_range=(50,5000), fprompt_range=(0.1,1))
+        data.get_avgwf_all(pe_range=(pe_cut,5000), fprompt_range=(0.1,1))
         data.fill_tree()
         for ch in range(4):
             data.ch[ch].clear_all()
