@@ -1,7 +1,7 @@
 import subprocess
 
 class Scheduler():
-    """Class for managing and submitting jobs for a large number of analysis to the Della cluster at Princeton.
+    """Class for managing and submitting jobs for a large number of analyses to the Della cluster at Princeton.
 
     Atrributes
     ----------
@@ -53,16 +53,6 @@ class Scheduler():
             f.write(f"#SBATCH --time {self.wall_time}\n")
             f.write(f"#SBATCH --job-name job_{index}\n")
             f.write(f"#SBATCH --output {self.scratch}/log_{index}.log\n\n")
-            f.write("now=$(date +"%Y%m%d")\n\n")
             f.write(f"module load anaconda3/2021.11\n")
             f.write(f"conda activate ds-pu\n\n")
             f.write(f"python {self.script} -f {directory} -n {self.num}\n")
-
-
-
-
-
-
-
-
-
