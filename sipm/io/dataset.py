@@ -1,6 +1,4 @@
 import numpy as np
-import yaml 
-
 import sipm.io.sipm as sipm
 
 class Dataset: 
