@@ -7,14 +7,11 @@ dependencies:
   - jupyterlab
   - jupyter-server-proxy
   - matplotlib>=3.4
-  - multiprocess
   - notebook
   - numpy
   - pandas
   - pip
   - python=3.8
-  - pyyaml
   - scipy
-  - uproot
-  - uproot3
   - h5py
+  - pytables

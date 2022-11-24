@@ -26,10 +26,9 @@ class Dataset:
             self.sum_traces(clear=clear)
             self.sum.get_max()
             self.sum.get_integral()
-        else:
-            for i in self.channels:
-                self.ch[i].get_max()
-                self.ch[i].get_integral()
+        for i in self.channels:
+            self.ch[i].get_max()
+            self.ch[i].get_integral()
         if clear:
             self.clear()
             self.sum.clear()

@@ -1,5 +1,6 @@
 import subprocess
 import os
+import pwd
 from datetime import datetime
 
 class Scheduler():
@@ -18,9 +19,9 @@ class Scheduler():
         self.num = num
         self.dirs = dirs
         self.script = script
-        self.username = os.getlogin()
-        self.date = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
-        self.scratch = f"/scratch/gpfs/{self.username}/{self.date}"
+        self.username = pwd.getpwuid(os.getuid())[0]
+        self.date = datetime.today().strftime('%Y-%m-%d_%H-%M-%S')
+        self.scratch = f"/scratch/gpfs/{self.username}/jobs/{self.date}"
         self.partition = "physics"
         self.nodes = 1 
         self.tasks_per_node = 1 
@@ -46,7 +47,7 @@ class Scheduler():
 
         if not os.path.isdir(self.scratch):
             os.makedirs(f"{self.scratch}")
-            
+
         for index,directory in enumerate(self.dirs):
             self.batch_script(index,directory)
             cmd = f"sbatch {self.scratch}/job_{index}.sh"
