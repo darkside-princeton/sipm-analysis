@@ -1,15 +1,10 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import glob
-import matplotlib.pyplot as plt
-
-from scipy import signal
-from scipy.fft import fft
-from scipy.optimize import curve_fit
-
-import sipm.util.functions as func
-
+import scipy
 from BaselineRemoval import BaselineRemoval
 
+import sipm.util.functions as func
 
 class SiPM():
     def __init__(self, id, pol, path, samples):
@@ -66,12 +61,12 @@ class SiPM():
 
     def bandpass_filter(self, low, high, order=3, keep=False):
         if not self.filt_pars:
-            b, a = signal.butter(order, [low,high], analog=False, fs=self.sampling, btype='band')
+            b, a = scipy.signal.butter(order, [low,high], analog=False, fs=self.sampling, btype='band')
             self.filt_pars = [b,a]
         if keep:
             self.traces_orig = self.traces.copy()
         for ii,x in enumerate(self.traces):
-            self.traces[ii] = signal.filtfilt(*self.filt_pars, x)
+            self.traces[ii] = scipy.signal.filtfilt(*self.filt_pars, x)
     
     def get_max(self, traces=None):
         if traces == None:
@@ -104,7 +99,7 @@ class SiPM():
     def get_fft(self):
         self.fft = []
         for ii,x in enumerate(self.traces):
-            y = fft(x)
+            y = scipy.fft.fft(x)
             y = 2.0/self.samples * np.abs(y[1:self.samples//2])
             self.fft.append(y)
             
@@ -119,7 +114,7 @@ class SiPM():
         self.pp = []
         while len(self.pp)<=3:
             print('Peak search with width={} ...'.format(width))
-            self.pp,self.pdict = signal.find_peaks(h, prominence=prominence, width=width)
+            self.pp,self.pdict = scipy.signal.find_peaks(h, prominence=prominence, width=width)
             width -= 1
 
         if verbose > 0:
@@ -128,7 +123,7 @@ class SiPM():
         for x in self.pp: 
             fit_x = hx[:-1][x-fitrange:x+fitrange]
             fit_y = h[x-fitrange:x+fitrange]
-            popt,pcov = curve_fit(func.gauss, fit_x, fit_y, p0=[h[x], hx[:-1][x], 2], maxfev=10000)
+            popt,pcov = scipy.optimize.curve_fit(func.gauss, fit_x, fit_y, p0=[h[x], hx[:-1][x], 2], maxfev=10000)
             self.fit_p.append(popt)
             self.fit_c.append(pcov)
 
@@ -137,7 +132,7 @@ class SiPM():
         # get peak number
         peak_num = np.round(np.array(self.fit_p)[:,1]/gain)
 
-        self.calib,self.calib_err = curve_fit(func.line, peak_num, np.array(self.fit_p)[:,1])
+        self.calib,self.calib_err = scipy.optimize.curve_fit(func.line, peak_num, np.array(self.fit_p)[:,1])
         self.calib_err = np.sqrt(np.diag(self.calib_err))
 
     def get_breakdown(self):
