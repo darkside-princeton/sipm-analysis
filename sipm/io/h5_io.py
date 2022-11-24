@@ -81,7 +81,9 @@ class IO():
                     store.close()
                     break
                 except:
-                    time.sleep(np.random.randint(0,10))
+                    wait_time = np.random.randint(0,3)
+                    print(f"waiting {wait_time} seconds...counter is {counter}...")
+                    time.sleep(wait_time)
                     counter += 1
 
 
