@@ -1,4 +1,6 @@
 import subprocess
+import os
+from datetime import datetime
 
 class Scheduler():
     """Class for managing and submitting jobs for a large number of analyses to the Della cluster at Princeton.
@@ -16,7 +18,9 @@ class Scheduler():
         self.num = num
         self.dirs = dirs
         self.script = script
-        self.scratch = "/scratch/gpfs/GALBIATI/"
+        self.username = os.getlogin()
+        self.date = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
+        self.scratch = f"/scratch/gpfs/{self.username}/{self.date}"
         self.partition = "physics"
         self.nodes = 1 
         self.tasks_per_node = 1 
@@ -26,9 +30,23 @@ class Scheduler():
         self.conda_module = "module load anaconda3/2021.11"
         self.conda_activate = "conda activate ds-pu"
 
+    def check_dir(self):
+        """ Check if current directory is the main directory of the sipm-analysis repository. If not, then change directory. 
+        """
+
+        cwd = os.getcwd()
+        if cwd.split("/")[-1] in ['jupyter','sipm']:
+            os.chdir('../')
+
     def submit(self):
         """For each subdirectory a new shell script is generated and then executed by submitting it to the cluster.
         """
+
+        self.check_dir()
+
+        if not os.path.isdir(self.scratch):
+            os.makedirs(f"{self.scratch}")
+            
         for index,directory in enumerate(self.dirs):
             self.batch_script(index,directory)
             cmd = f"sbatch {self.scratch}/job_{index}.sh"
@@ -55,4 +73,5 @@ class Scheduler():
             f.write(f"#SBATCH --output {self.scratch}/log_{index}.log\n\n")
             f.write(f"module load anaconda3/2021.11\n")
             f.write(f"conda activate ds-pu\n\n")
+            f.write(f"pwd\n\n")
             f.write(f"python {self.script} -f {directory} -n {self.num}\n")
