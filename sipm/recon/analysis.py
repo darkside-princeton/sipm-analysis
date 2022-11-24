@@ -10,9 +10,9 @@ parser.add_argument("-c", '--clear', type=bool, default=True)
 args = parser.parse_args()
 
 def main():
-    io = h5_io.IO(filename=args.file_dir)
     d = ds.Dataset(path=args.file_dir)
     d.analyze(num_events=args.num_events, clear=args.clear, sum=args.sum)
+    io = h5_io.IO(dataset=d)
     io.save()
     print('Done...')
 
