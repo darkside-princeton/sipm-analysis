@@ -12,118 +12,39 @@ if __name__ == '__main__':
     #usage: python root_calibration.py index
     index = int(sys.argv[1])
     data_dir = '/scratch/gpfs/GALBIATI/data/sipm/reflector_studies/'
-    direc = [   '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/0/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/1/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/2/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/3/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/4/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/5/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/6/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/7/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/8/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/9/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/10/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/11/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/12/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/13/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/14/',
-                '2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/15/',
 
-                '2022-11-09/2022-11-09_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_high_stat/',
-                '2022-11-10/2022-11-10_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_high_stat/',
-                '2022-11-14/2022-11-14_volt_65_pos_top_light_scintillation_coinc_111_cond_gamma_high_stat/',
-                '2022-11-15/2022-11-15_volt_65_pos_top_light_scintillation_coinc_111_cond_gamma_high_stat/',
-                '2022-11-17/2022-11-17_volt_65_pos_top_light_scintillation_coinc_000_cond_gamma/',
-                '2022-11-18/2022-11-18_volt_65_pos_top_light_scintillation_coinc_000_cond_gamma/',
-                '2022-11-20/2022-11-20_volt_65_pos_top_light_scintillation_coinc_000_cond_gamma/',
+    files = []
+    #Top: 23 datasets
+    for i in range(16):
+        files.append(['2022-11-08/2022-11-08_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_overnight/{}/'.format(i),1,'gamma_1108_{}_65V_top'.format(i)])
+    files.append(['2022-11-09/2022-11-09_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_high_stat/',20,'gamma_1109_65V_top'])
+    files.append(['2022-11-10/2022-11-10_volt_65_pos_top_light_scintillation_coinc_111_cond_with_gamma_high_stat/',20,'gamma_1110_65V_top'])
+    files.append(['2022-11-14/2022-11-14_volt_65_pos_top_light_scintillation_coinc_111_cond_gamma_high_stat/',20,'gamma_1114_65V_top'])
+    files.append(['2022-11-15/2022-11-15_volt_65_pos_top_light_scintillation_coinc_111_cond_gamma_high_stat/',20,'gamma_1115_65V_top'])
+    files.append(['2022-11-17/2022-11-17_volt_65_pos_top_light_scintillation_coinc_000_cond_gamma/',20,'gamma_1117_65V_top'])
+    files.append(['2022-11-18/2022-11-18_volt_65_pos_top_light_scintillation_coinc_000_cond_gamma/',20,'gamma_1118_65V_top'])
+    files.append(['2022-11-20/2022-11-20_volt_65_pos_top_light_scintillation_coinc_000_cond_gamma/',20,'gamma_1120_65V_top'])
+    #Bottom: 70 datasets
+    for i in range(6):
+        files.append(['2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_{}/'.format(i+1),10,'gamma_1107_p{}_65V_bottom'.format(i+1)])
+    for i in range(14):
+        files.append(['2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/{}/'.format(i),1,'gamma_1107_{}_65V_bottom'.format(i)])
+    files.append(['2022-11-09/2022-11-09_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_high_stat/',20,'gamma_1109_65V_bottom'])
+    files.append(['2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_gamma_high_stat/',20,'gamma_1110_65V_bottom'])
+    for i in range(20):
+        files.append(['2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/{}/'.format(i),1,'gamma_1110_{}_65V_bottom'.format(i)])
+    files.append(['2022-11-15/2022-11-15_volt_65_pos_bottom_light_scintillation_coinc_111_cond_gamma_high_stat/',20,'gamma_1115_65V_bottom'])
+    for i in range(6):
+        files.append(['2022-11-15/2022-11-15_volt_65_pos_bottom_light_scintillation_coinc_111_cond_gamma_overnight/{}/'.format(i),1,'gamma_1115_{}_65V_bottom'.format(i)])
+    files.append(['2022-11-16/2022-11-16_volt_65_pos_bottom_light_scintillation_coinc_111_cond_gamma/',20,'gamma_1116_65V_bottom'])
+    for i in range(6):
+        files.append(['2022-11-16/2022-11-16_volt_65_pos_bottom_light_scintillation_coinc_111_cond_gamma_overnight/{}/'.format(i),1,'gamma_1116_{}_65V_bottom'.format(i)])
+    files.append(['2022-11-17/2022-11-17_volt_65_pos_bottom_light_scintillation_coinc_000_cond_gamma/',20,'gamma_1117_65V_bottom'])
+    files.append(['2022-11-18/2022-11-18_volt_65_pos_bottom_light_scintillation_coinc_000_cond_gamma/',20,'gamma_1118_65V_bottom'])
+    for i in range(11):
+        files.append(['2022-11-18/2022-11-18_volt_65_pos_bottom_light_scintillation_coinc_000_cond_gamma_overnight/{}/'.format(i),1,'gamma_1118_{}_65V_bottom'.format(i)])
+    files.append(['2022-11-20/2022-11-20_volt_65_pos_bottom_light_scintillation_coinc_000_cond_gamma/',20,'gamma_1120_65V_bottom'])
 
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_1/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_2/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_3/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_4/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_5/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_6/',
-
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/0/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/1/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/2/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/3/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/4/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/5/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/6/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/7/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/8/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/9/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/10/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/11/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/12/',
-                '2022-11-07/2022-11-07_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_purification_overnight/13/',
-
-                '2022-11-09/2022-11-09_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_high_stat/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_gamma_high_stat/',
-
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/0/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/1/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/2/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/3/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/4/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/5/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/6/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/7/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/8/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/9/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/10/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/11/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/12/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/13/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/14/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/15/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/16/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/17/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/18/',
-                '2022-11-10/2022-11-10_volt_65_pos_bottom_light_scintillation_coinc_111_cond_with_gamma_overnight/19/',
-
-                '2022-11-15/2022-11-15_volt_65_pos_bottom_light_scintillation_coinc_111_cond_gamma_high_stat/',
-                '2022-11-16/2022-11-16_volt_65_pos_bottom_light_scintillation_coinc_111_cond_gamma/',
-                '2022-11-17/2022-11-17_volt_65_pos_bottom_light_scintillation_coinc_000_cond_gamma/',
-                '2022-11-18/2022-11-18_volt_65_pos_bottom_light_scintillation_coinc_000_cond_gamma/',
-                '2022-11-20/2022-11-20_volt_65_pos_bottom_light_scintillation_coinc_000_cond_gamma/'
-            ]
-    nsubdir = [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 20,20,20,20,20,20,20,  10,10,10,10,10,10, 1,1,1,1,1,1,1,1,1,1,1,1,1,1, 20,20, 20,20,20,20,20]
-    outfile = [ 'gamma_1108_0_65V_top',
-                'gamma_1108_1_65V_top',
-                'gamma_1108_2_65V_top',
-                'gamma_1108_3_65V_top',
-                'gamma_1108_4_65V_top',
-                'gamma_1108_5_65V_top',
-                'gamma_1108_6_65V_top',
-                'gamma_1108_7_65V_top',
-                'gamma_1108_8_65V_top',
-                'gamma_1108_9_65V_top',
-                'gamma_1108_10_65V_top',
-                'gamma_1108_11_65V_top',
-                'gamma_1108_12_65V_top',
-                'gamma_1108_13_65V_top',
-                'gamma_1108_14_65V_top',
-                'gamma_1108_15_65V_top',
-
-                'gamma_1109_65V_top',
-                'gamma_1110_65V_top',
-                'gamma_1114_65V_top',
-                'gamma_1115_65V_top',
-                'gamma_1117_65V_top',
-                'gamma_1118_65V_top',
-                'gamma_1120_65V_top',
-
-                'gamma_1107_65V_bottom',
-                'gamma_1109_65V_bottom',
-                'gamma_1110_65V_bottom',
-                'gamma_1115_65V_bottom',
-                'gamma_1116_65V_bottom',
-                'gamma_1117_65V_bottom',
-                'gamma_1118_65V_bottom',
-                'gamma_1120_65V_bottom'
-            ]
     ##########
     # Read Qavg/(1-p) from calibration file
     ##########
@@ -134,7 +55,7 @@ if __name__ == '__main__':
             line_count = 0
             for row in r:
                 if line_count>0:
-                    if index<8:
+                    if index<23:
                         if line_count<=4:
                             spe_gain.append(float(row[5])/(1-float(row[3])))
                     else:
@@ -148,12 +69,12 @@ if __name__ == '__main__':
     for ch in range(4):
         print('Ch{} spe_gain=[{:.3f},{:.3f},{:.3f},{:.3f}]'.format(ch, *spe_gain))
 
-    data = ds.Dataset('', mode='scintillation', spe=spe_gain, pol=-1, channels=range(4), root_file_name='../root/{}.root'.format(outfile[index]))
-    for i in range(nsubdir[index]):
-        if nsubdir[index]==1:
-            subdir = '{}{}'.format(data_dir, direc[index])
+    data = ds.Dataset('', mode='scintillation', spe=spe_gain, pol=-1, channels=range(4), root_file_name='../root/{}.root'.format(files[index][2]))
+    for i in range(files[index][1]):
+        if files[index][1]==1:
+            subdir = '{}{}'.format(data_dir, files[index][0])
         else:
-            subdir = '{}{}{}/'.format(data_dir, direc[index], i)
+            subdir = '{}{}{}/'.format(data_dir, files[index][0], i)
         print(subdir)
         for ch in range(4):    
             data.ch[ch].path = subdir
