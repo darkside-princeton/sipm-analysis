@@ -2,10 +2,13 @@
 #SBATCH --partition physics
 #SBATCH --nodes 1
 #SBATCH --ntasks-per-node 1
-#SBATCH --mem-per-cpu 32G
+#SBATCH --mem-per-cpu 4G
 #SBATCH --time 3:00:00
 #SBATCH --job-name jupyter-notebook
 #SBATCH --output jupyter-notebook-%J.log
+
+# delete all previous log files except the newly generated one for this job
+find . -type f  -name "jupyter-notebook-*.log" ! -name "jupyter-notebook-${SLURM_JOB_ID}.log" -delete
 
 # get tunneling info
 XDG_RUNTIME_DIR=""
@@ -16,7 +19,6 @@ cluster=$(hostname -f | awk -F"." '{print $2}')
 
 # load modules or conda environments here
 module load anaconda3/2021.11
-conda activate myenv
-
+conda activate ds-pu
 
 jupyter-notebook --no-browser --port=8888 --ip=${node}
