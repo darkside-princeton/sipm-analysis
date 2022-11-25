@@ -8,3 +8,5 @@ scipy
 uproot3
 xlrd
 h5py
+pytables
+hdfview
