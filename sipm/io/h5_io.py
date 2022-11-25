@@ -65,14 +65,18 @@ class IO():
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
 
             metadata = self.get_metadata(self.filename)
-
             tag = ""
             for x,y in metadata.items():
                 tag += f"_{x}_{y}"
 
+            rng_seed = np.random.default_rng()
+
+            wait_time = rng_seed.random()*10
+            print(f"waiting {wait_time} seconds before writing data...")
+            time.sleep(wait_time)
             counter = 0
             while True:
-                if counter > 10:
+                if counter > 100:
                     break
                 try:
                     store = pd.HDFStore(f"{self.scratch}/{self.date}{tag}.h5")
@@ -80,8 +84,9 @@ class IO():
                     store.get_storer(f"{metadata['volt']}/{i}").attrs.metadata = metadata
                     store.close()
                     break
-                except:
-                    wait_time = np.random.randint(0,3)
+                except Exception as e:
+                    print(e)
+                    wait_time = rng_seed.random()
                     print(f"waiting {wait_time} seconds...counter is {counter}...")
                     time.sleep(wait_time)
                     counter += 1
