@@ -10,11 +10,17 @@ parser.add_argument("-c", '--clear', type=bool, default=True)
 args = parser.parse_args()
 
 def main():
+    # Create new dataset object
     d = ds.Dataset(path=args.file_dir)
+
+    # Run the standard analysis on the dataset
     d.analyze(num_events=args.num_events, clear=args.clear, sum=args.sum)
+
+    # Create a IO objects to save the high level information
     io = h5_io.IO(dataset=d)
+
+    # Save data to HDF5
     io.save()
-    print('Done...')
 
 if __name__ == "__main__":
     main()

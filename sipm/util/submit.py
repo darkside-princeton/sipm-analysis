@@ -53,7 +53,6 @@ class Scheduler():
             self.batch_script(index,directory)
             cmd = f"sbatch {self.scratch}/job_{index}.sh"
             p = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            time.sleep(0.1)
 
     def batch_script(self, index, directory):
         """Generates shell script for submitting slurm jobs to the Della cluster at Princeton and saves them under the common directory defined by `self.scratch`.
