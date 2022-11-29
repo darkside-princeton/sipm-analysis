@@ -134,3 +134,8 @@ settings.json
 # files
 *.xls
 *.pdf
+*.csv
+*.png 
+*.root 
+*.err
+*.out
