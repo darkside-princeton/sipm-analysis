@@ -1,0 +1,14 @@
+######################################################
+# Config file to run the SiPM analysis of the
+# Princeton Liquid Argon Test Setup 
+# Contact: Ako Jamil (ako.jamil@princeton.edu)
+######################################################
+
+Path: "/scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2022-11-22/**/*/"
+Calibration:
+  Voltages: [61,63,65,67,69]
+  Analysis:
+    - filter
+    - baseline
+    - integral
+    - amplitude
