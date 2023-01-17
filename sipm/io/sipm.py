@@ -3,7 +3,6 @@ import numpy as np
 import glob
 import scipy
 from BaselineRemoval import BaselineRemoval
-
 import sipm.util.functions as func
 
 class SiPM():
@@ -21,6 +20,7 @@ class SiPM():
         self.samples = samples
         self.header = [0]*6
         self.traces = []
+        self.ar_filtered_traces = []
         self.timestamp = []
     
     def read_data(self, header=True, num_events=1e9):
@@ -68,6 +68,58 @@ class SiPM():
         for ii,x in enumerate(self.traces):
             self.traces[ii] = scipy.signal.filtfilt(*self.filt_pars, x)
     
+    def ar_filter(self, tau):
+        wf_filt = np.zeros(self.traces.transpose().shape)
+        for i,raw in enumerate(list(reversed(self.traces.transpose()))):
+            if i>0:
+                wf_filt[i] = raw + wf_filt[i-1]*np.exp(-1/tau)
+            else:
+                wf_filt[i] = raw
+        self.ar_filtered_traces = np.array(list(reversed(wf_filt))).transpose()
+    
+    def get_waveforms(self, ev=[], ar_filter=True):
+        if self.traces==[]:
+            self.read_data()
+            self.baseline_subtraction()
+            if ar_filter:
+                self.ar_filter(tau=20)
+        wfs = []
+        arwfs = []
+        for ev_ in ev:
+            wfs.append(self.traces[ev_,:])
+            arwfs.append(self.ar_filtered_traces[ev_,:])
+        self.clear()
+        return wfs, arwfs
+
+    def get_famp_hist(self, bin):
+        self.famp_hist, self.famp_hist_bin = np.histogram(self.famp, bins=bin[2], range=(bin[0],bin[1]))
+
+    def find_histo_peaks(self, thre, prom, wid, dist):
+        self.peaks, self.pdict = scipy.signal.find_peaks(self.famp_hist[thre:], prominence=prom, width=wid, distance=dist)
+        
+    def get_charge_histo_pe(self, bin):
+        self.ap_charge = []
+        self.ap_charge_hist = []
+        self.ap_charge_hist_bin = []
+        for pe in range(len(self.pe_cuts)-1):
+            ap_charge = []
+            if pe==0:
+                min_fa = self.pe_cuts[0]
+            else:
+                min_fa = self.pe_cuts[pe]
+            if pe==len(self.pe_cuts)-2:
+                max_fa = self.pe_cuts[-1]
+            else:
+                max_fa = self.pe_cuts[pe+1]
+
+            for i,fa in enumerate(self.famp):
+                if fa<max_fa and fa>min_fa:
+                    ap_charge.append(self.integral_long[i])
+            ap_charge_hist, ap_charge_hist_bin = np.histogram(ap_charge, bins=bin[2], range=(bin[0],bin[1]))
+            self.ap_charge.append(ap_charge)
+            self.ap_charge_hist.append(ap_charge_hist)
+            self.ap_charge_hist_bin.append(ap_charge_hist_bin)
+
     def get_max(self, traces=None):
         if traces == None:
             traces = self.traces
@@ -105,6 +157,7 @@ class SiPM():
             
     def clear(self):
         self.traces = []
+        self.ar_filtered_traces = []
 
     def calibrate(self,vals,width=6,prominence=2,verbose=-1,fitrange=10):
         self.fit_p = []
