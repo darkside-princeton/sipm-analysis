@@ -1,5 +1,5 @@
 import argparse
-import sipm.io.dataset as ds
+import sipm.io.WaveformDataset as wfd
 import sipm.io.h5_io as h5_io
 
 parser = argparse.ArgumentParser("Princeton SiPM Analysis")
@@ -11,7 +11,7 @@ args = parser.parse_args()
 
 def main():
     # Create new dataset object
-    d = ds.Dataset(path=args.file_dir)
+    d = wfd.WaveformDataset(path=args.file_dir)
 
     # Run the standard analysis on the dataset
     d.analyze(num_events=args.num_events, clear=args.clear, sum=args.sum)
