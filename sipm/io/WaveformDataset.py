@@ -1,5 +1,5 @@
 import numpy as np
-import sipm.io.sipm as sipm
+import sipm.io.WaveformAnalyzer as wfa
 
 class Dataset: 
     def __init__(self,  path, pol=-1, channels=[0,1,2,3], samples=3000):
@@ -13,7 +13,7 @@ class Dataset:
     def InitializeChannels(self):
         channels = []
         for i in self.channels:
-            new_channel = sipm.SiPM(id=i, pol=self.pol, path=self.path, samples=self.samples)
+            new_channel = wfa.WaveformAnalyzer(id=i, pol=self.pol, path=self.path, samples=self.samples)
             channels.append(new_channel)
         return np.array(channels)
     
@@ -34,7 +34,7 @@ class Dataset:
             self.sum.clear()
 
     def sum_traces(self, clear=True):
-        self.sum = sipm.SiPM(id=-1, pol=self.pol, path=self.path, samples=self.samples)
+        self.sum = wfa.WaveformAnalyzer(id=-1, pol=self.pol, path=self.path, samples=self.samples)
         self.sum.traces = np.array([self.ch[i].traces for i in self.channels])
         self.sum.traces = np.sum(self.sum.traces, axis=0)
     
