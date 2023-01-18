@@ -1,7 +1,7 @@
 import numpy as np
 import sipm.io.WaveformAnalyzer as wfa
 
-class Dataset: 
+class WaveformDataset: 
     def __init__(self,  path, pol=-1, channels=[0,1,2,3], samples=3000):
         self.datadir = "/scratch/gpfs/GALBIATI/data/sipm/reflector_studies/"
         self.path = f"{self.datadir}/{path.replace(self.datadir, '')}"
