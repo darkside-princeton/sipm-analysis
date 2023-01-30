@@ -18,7 +18,6 @@ user=$(whoami)
 cluster=$(hostname -f | awk -F"." '{print $2}')
 
 # load modules or conda environments here
-module load anaconda3/2021.11
 conda activate ds-pu
 
 jupyter-notebook --no-browser --port=8888 --ip=${node}

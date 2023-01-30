@@ -73,7 +73,6 @@ class Scheduler():
             f.write(f"#SBATCH --time {self.wall_time}\n")
             f.write(f"#SBATCH --job-name job_{index}\n")
             f.write(f"#SBATCH --output {self.scratch}/log_{index}.log\n\n")
-            f.write(f"module load anaconda3/2021.11\n")
             f.write(f"conda activate ds-pu\n\n")
             f.write(f"pwd\n\n")
             f.write(f"python {self.script} -f {directory} -n {self.num}\n")
