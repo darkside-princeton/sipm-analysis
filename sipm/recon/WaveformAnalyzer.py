@@ -5,7 +5,7 @@ import scipy
 from BaselineRemoval import BaselineRemoval
 import sipm.util.functions as func
 
-class SiPM():
+class WaveformAnalyzer():
     def __init__(self, id, pol, path, samples):
         self.path = path
         self.id = id
