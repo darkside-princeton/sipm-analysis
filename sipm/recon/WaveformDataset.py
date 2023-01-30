@@ -1,5 +1,5 @@
 import numpy as np
-import sipm.io.WaveformAnalyzer as wfa
+import sipm.recon.WaveformAnalyzer as wfa
 
 class WaveformDataset: 
     def __init__(self,  path, pol=-1, channels=[0,1,2,3], samples=3000):

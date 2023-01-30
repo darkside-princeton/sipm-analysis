@@ -12,11 +12,11 @@ class Scheduler():
     dirs : list of string
         List of directories containging the wavedump files to be analyzed.
     script : string, optional
-        The analysis python script that will run the default analysis on all files. By default this is located under `sipm/recon/analysis.py`.
+        The analysis python script that will run the default analysis on all files. By default this is located under `sipm/exe/analysis.py`.
     num : string, optional
         Number of waveforms for each file to analyze. Default is set to 1e9, which effectively means that the entire file will be read in and analyzed. 
     """
-    def __init__(self, dirs, script="sipm/recon/analysis.py",  num=1000000000):
+    def __init__(self, dirs, script="sipm/exe/analysis.py",  num=1000000000):
         self.num = num
         self.dirs = dirs
         self.script = script

@@ -1,6 +1,6 @@
 import argparse
-import sipm.io.WaveformDataset as wfd
-import sipm.io.h5_io as h5_io
+import sipm.recon.WaveformDataset as wfd
+import sipm.recon.h5_io as h5_io
 
 parser = argparse.ArgumentParser("Princeton SiPM Analysis")
 parser.add_argument("-n", "--num_events", type=int, default=100000)
