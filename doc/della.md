@@ -13,7 +13,7 @@ ssh your-netid@della.princeton.edu
 
 Your private data directory is ```/scratch/gpfs/your-netid/```, and the shared data directory of the group is ```/scratch/gpfs/GALBIATI/```.
 
-# Running Jupyter Notebook
+# Running Jupyter Notebooks
 
 On the Della cluster the login node is not meant for running extensive scripts or notebooks.
 
