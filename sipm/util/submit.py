@@ -29,7 +29,6 @@ class Scheduler():
         self.cpu_memory = 4 # in GB
         self.wall_time = "1:10:00"
         self.output = "test3.log"
-        self.conda_module = "module load anaconda3/2021.11"
         self.conda_activate = "conda activate ds-pu"
 
     def check_dir(self):

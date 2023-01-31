@@ -40,7 +40,13 @@ class WaveformDataset:
             header (bool, optional): Whether wavedump file contains header. Defaults to True.
             num_events (int, optional): Number of events. Defaults to 1e9.
         """
-        pass
+        for i in self.channels:
+            self.ch[i].read_data(header=header, num_events=num_events)
+            self.ch[i].baseline_subtraction(samples=self.ch[i].trigger_position-100)
+            self.ch[i].ar_filter(tau=20)
+            self.ch[i].get_max(ar=True, trig=True)
+            self.ch[i].get_integral(length_us=[5])
+        self.clear()
 
     def process_laser_waveforms(self, header=True, num_events=1e9, calib=""):
         """Obtain single PE average waveform from laser data. Only a placeholder for now.
