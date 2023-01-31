@@ -22,12 +22,12 @@ conda env create -f conda.yml
 
 and then you can activate it via 
 ```
-conda activate ds-pu
+conda activate sipm
 ```
 
 Before we get the actual analysis code we can make sure that the conda environment also shows up as an available Jupyter kernel by running
 ```
-ipython kernel install --name "ds-pu" --user
+ipython kernel install --name "sipm" --user
 ```
 
 Next, we need to download the code repository
