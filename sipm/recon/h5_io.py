@@ -88,6 +88,7 @@ class IO():
 
         for i in self.d.channels:
             data = self.d.ch[i].output
+            print('keys: ',data.keys())
             
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
 

@@ -42,10 +42,10 @@ class WaveformDataset:
         """
         for i in self.channels:
             self.ch[i].read_data(header=header, num_events=num_events)
-            self.ch[i].baseline_subtraction(samples=self.ch[i].trigger_position-100)
-            self.ch[i].ar_filter(tau=20)
-            self.ch[i].get_max(ar=True, trig=True)
-            self.ch[i].get_integral(length_us=[5])
+            self.ch[i].baseline_subtraction(samples=self.ch[i].trigger_position-int(0.5/self.ch[i].sample_step)) # average maximum position - 0.5us
+            self.ch[i].ar_filter(tau=20) # 20 samples = 80us = fast component
+            self.ch[i].get_max(ar=True, trig=True) # AR matched filter, maximum near trigger position
+            self.ch[i].get_integral(length_us=[5]) # 5us integral
         self.clear()
 
     def process_laser_waveforms(self, header=True, num_events=1e9, calib=""):

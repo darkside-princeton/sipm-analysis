@@ -54,7 +54,7 @@ class WaveformAnalyzer():
             file.close()
         self.traces = np.array(self.traces).astype(float)     
         self.time = np.arange(0,self.sample_step*self.samples,self.sample_step)
-        self.trigger_position = np.argmax(np.mean(self.traces, axis=0))
+        self.trigger_position = np.argmax(self.pol*np.mean(self.traces, axis=0))
 
     def baseline_subtraction(self, samples=500):
         self.output['baseline_mean'] = []
@@ -137,8 +137,8 @@ class WaveformAnalyzer():
             self.output['amplitude_trig'] = []
             self.output['peakpos_trig'] = []
             for ii,x in enumerate(traces):
-                self.output['amplitude_trig'].append(np.max(x[self.trigger_position-50:self.trigger_position+50]))
-                self.output['peakpos_trig'].append(np.argmax(x[self.trigger_position-50:self.trigger_position+50]))
+                self.output['amplitude_trig'].append(np.max(x[self.trigger_position-20:self.trigger_position+20]))
+                self.output['peakpos_trig'].append(self.trigger_position-20+np.argmax(x[self.trigger_position-20:self.trigger_position+20]))
         else:
             self.output['amplitude'] = []
             self.output['peakpos'] = []
