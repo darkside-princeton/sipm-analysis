@@ -33,6 +33,47 @@ class WaveformDataset:
             self.clear()
             self.sum.clear()
 
+    def process_laser_pulses(self, header=True, num_events=1e9):
+        """Obtain pulse information from laser data. Only a placeholder for now.
+
+        Args:
+            header (bool, optional): Whether wavedump file contains header. Defaults to True.
+            num_events (int, optional): Number of events. Defaults to 1e9.
+        """
+        pass
+
+    def process_laser_waveforms(self, header=True, num_events=1e9, calib=""):
+        """Obtain single PE average waveform from laser data. Only a placeholder for now.
+
+        Args:
+            header (bool, optional): Whether wavedump file contains header. Defaults to True.
+            num_events (int, optional): Number of events. Defaults to 1e9.
+            calib (str, optional): Directory that contains SiPM calibration results. Defaults to "".
+        """
+        pass
+
+    def process_scintillation_pulses(self, header=True, num_events=1e9, calib=""):
+        """Obtain pulse information from scintillation data. Only a placeholder for now.
+
+        Args:
+            header (bool, optional): Whether wavedump file contains header. Defaults to True.
+            num_events (int, optional): Number of events. Defaults to 1e9.
+            calib (str, optional): Directory that contains SiPM calibration results. Defaults to "".
+        """
+        pass
+
+    def process_scintillation_waveforms(self, header=True, num_events=1e9, calib="", fprompt=[0.1,0.6], pe=[300,700]):
+        """Obtain average waveform from scintillation data. Only a placeholder for now.
+
+        Args:
+            header (bool, optional): Whether wavedump file contains header. Defaults to True.
+            num_events (_type_, optional): Number of events. Defaults to 1e9.
+            calib (str, optional): Directory that contains SiPM calibration results. Defaults to "".
+            fprompt (list, optional): Range of f_prompt. Defaults to [0.1,0.6].
+            pe (list, optional): Range of PEs. Defaults to [300,700].
+        """
+        pass
+
     def sum_traces(self, clear=True):
         self.sum = wfa.WaveformAnalyzer(id=-1, pol=self.pol, path=self.path, samples=self.samples)
         self.sum.traces = np.array([self.ch[i].traces for i in self.channels])
