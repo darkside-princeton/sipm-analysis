@@ -14,6 +14,9 @@ def line_simple(x,a,b):
 def line(x,a,b):
     return a*(x-b)
 
+def power(x,p):
+    return p**x
+
 def sipm_temp(x,V0,mu,sigma,tau,tau2):
     return V0/2.0 * erfc(1.0/np.sqrt(2.0) * (sigma/tau - (x-mu)/sigma)) * ( np.exp(0.5 * (sigma/tau)**2 - (x-mu)/tau) + np.exp(0.5 * (sigma/tau2)**2 - (x-mu)/tau2))
 
