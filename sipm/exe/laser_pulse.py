@@ -11,7 +11,7 @@ def main():
     # Create new dataset object
     d = wfd.WaveformDataset(path=args.file_dir)
 
-    # Run the standard analysis on the dataset
+    # Run pulse analysis on laser data
     d.process_laser_pulses(num_events=args.num_events)
 
     # Create a IO objects to save the high level information

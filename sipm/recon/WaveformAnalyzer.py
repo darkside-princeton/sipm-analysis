@@ -7,6 +7,14 @@ import sipm.util.functions as func
 
 class WaveformAnalyzer():
     def __init__(self, id, pol, path, samples):
+        """Class that analyzes the waveform data to obtain higher-level information.
+
+        Args:
+            id (int): Channel number
+            pol (int): Polarity
+            path (str): Data folder path
+            samples (int): Length of acquisition window
+        """
         self.path = path
         self.id = id
         self.pol = pol
@@ -57,6 +65,11 @@ class WaveformAnalyzer():
         self.trigger_position = np.argmax(self.pol*np.mean(self.traces, axis=0))
 
     def baseline_subtraction(self, samples=500):
+        """Computes baseline mean and rms and subtracts baseline mean from raw waveform
+
+        Args:
+            samples (int, optional): Baseline evaluation window starting from the beginning of acquisition. Defaults to 500.
+        """
         self.output['baseline_mean'] = []
         self.output['baseline_rms'] = []
         for ii,x in enumerate(self.traces):
@@ -76,6 +89,11 @@ class WaveformAnalyzer():
             self.traces[ii] = scipy.signal.filtfilt(*self.filt_pars, x)
     
     def ar_filter(self, tau):
+        """Matched filter using auto-regressive algorithm
+
+        Args:
+            tau (float): Time constant in units of sample.
+        """
         wf_filt = np.zeros(self.traces.transpose().shape)
         for i,raw in enumerate(list(reversed(self.traces.transpose()))):
             if i>0:
@@ -85,6 +103,15 @@ class WaveformAnalyzer():
         self.ar_filtered_traces = np.array(list(reversed(wf_filt))).transpose()
     
     def get_waveforms(self, ev=[], ar_filter=True):
+        """Return several baseline-subtracted waveforms
+
+        Args:
+            ev (list, optional): A list of event ids. Defaults to [].
+            ar_filter (bool, optional): Whether to return ar-filtered waveforms. Defaults to True.
+
+        Returns:
+            list, list: baseline-subtracted waveforms, ar-filtered waveforms
+        """
         if self.traces==[]:
             self.read_data()
             self.baseline_subtraction()
@@ -128,6 +155,13 @@ class WaveformAnalyzer():
             self.ap_charge_hist_bin.append(ap_charge_hist_bin)
 
     def get_max(self, traces=None, ar=False, trig=False):
+        """Evaluate amplitude.
+
+        Args:
+            traces (_type_, optional): _description_. Defaults to None.
+            ar (bool, optional): Whether to use AR filter. Defaults to False.
+            trig (bool, optional): Whether to confine the evaluation within 20 samples from the trigger position (average maximum position). Defaults to False.
+        """
         if traces == None:
             if ar:
                 traces = self.ar_filtered_traces
@@ -147,6 +181,12 @@ class WaveformAnalyzer():
                 self.output['peakpos'].append(np.argmax(x))
 
     def get_integral(self, traces=None, length_us=[]):
+        """Evaluate charge integral.
+
+        Args:
+            traces (_type_, optional): _description_. Defaults to None.
+            length_us (list, optional): A list of integration time windows. Defaults to [].
+        """
         if traces == None:
             traces = self.traces
         if len(length_us)==0:

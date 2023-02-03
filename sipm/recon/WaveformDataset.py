@@ -3,6 +3,14 @@ import sipm.recon.WaveformAnalyzer as wfa
 
 class WaveformDataset: 
     def __init__(self,  path, pol=-1, channels=[0,1,2,3], samples=3000):
+        """Class that analyzes the waveform data. Contains a list of WaveformAnalyzer objects for all the channels in a SiPM array.
+
+        Args:
+            path (str): Data folder path
+            pol (int, optional): Polarity. Defaults to -1.
+            channels (list, optional): A list of channel numbers. Defaults to [0,1,2,3].
+            samples (int, optional): Length of acquisition window. Defaults to 3000.
+        """
         self.datadir = "/scratch/gpfs/GALBIATI/data/sipm/reflector_studies/"
         self.path = f"{self.datadir}/{path.replace(self.datadir, '')}"
         self.channels = channels
@@ -34,7 +42,7 @@ class WaveformDataset:
             self.sum.clear()
 
     def process_laser_pulses(self, header=True, num_events=1e9):
-        """Obtain pulse information from laser data. Only a placeholder for now.
+        """Obtain pulse information from laser data.
 
         Args:
             header (bool, optional): Whether wavedump file contains header. Defaults to True.

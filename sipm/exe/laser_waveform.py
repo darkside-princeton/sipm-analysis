@@ -12,7 +12,7 @@ def main():
     # Create new dataset object
     d = wfd.WaveformDataset(path=args.file_dir)
 
-    # Run the standard analysis on the dataset
+    # Run waveform shape analysis on laser data
     d.process_laser_waveforms(num_events=args.num_events, calib=args.sipm_calib_dir)
 
     # Create a IO objects to save the high level information
