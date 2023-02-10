@@ -16,10 +16,8 @@ class Scheduler():
     num : string, optional
         Number of waveforms for each file to analyze. Default is set to 1e9, which effectively means that the entire file will be read in and analyzed. 
     """
-    def __init__(self, dirs, script="sipm/exe/analysis.py",  num=1000000000):
-        self.num = num
+    def __init__(self, dirs):
         self.dirs = dirs
-        self.script = script
         self.username = pwd.getpwuid(os.getuid())[0]
         self.date = datetime.today().strftime('%Y-%m-%d_%H-%M-%S')
         self.scratch = f"/scratch/gpfs/{self.username}/jobs/{self.date}"
@@ -29,7 +27,6 @@ class Scheduler():
         self.cpu_memory = 4 # in GB
         self.wall_time = "1:10:00"
         self.output = "test3.log"
-        self.conda_module = "module load anaconda3/2021.11"
         self.conda_activate = "conda activate ds-pu"
 
     def check_dir(self):
@@ -40,7 +37,7 @@ class Scheduler():
         if cwd.split("/")[-1] in ['jupyter','sipm']:
             os.chdir('../')
 
-    def submit(self):
+    def submit(self, script="sipm/exe/analysis.py", args=""):
         """For each subdirectory a new shell script is generated and then executed by submitting it to the cluster.
         """
 
@@ -50,11 +47,11 @@ class Scheduler():
             os.makedirs(f"{self.scratch}")
 
         for index,directory in enumerate(self.dirs):
-            self.batch_script(index,directory)
+            self.batch_script(index,directory,script,args)
             cmd = f"sbatch {self.scratch}/job_{index}.sh"
             p = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    def batch_script(self, index, directory):
+    def batch_script(self, index, directory,script, args):
         """Generates shell script for submitting slurm jobs to the Della cluster at Princeton and saves them under the common directory defined by `self.scratch`.
 
         Parameters
@@ -75,4 +72,4 @@ class Scheduler():
             f.write(f"#SBATCH --output {self.scratch}/log_{index}.log\n\n")
             f.write(f"conda activate ds-pu\n\n")
             f.write(f"pwd\n\n")
-            f.write(f"python {self.script} -f {directory} -n {self.num}\n")
+            f.write(f"python {script} -f {directory} {args}\n")

@@ -87,11 +87,9 @@ class IO():
             os.makedirs(f"{self.scratch}")
 
         for i in self.d.channels:
-            data = {} 
-            data['amplitude'] = self.d.ch[i].peak
-            data['integral'] = self.d.ch[i].integral
-            data['avg_waveform'] = np.mean(self.d.ch[i].traces, axis=0)
-            data['time'] = self.d.ch[i].time
+            data = self.d.ch[i].output
+            print('keys: ',data.keys())
+            
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
 
             metadata = self.get_metadata(self.filename)

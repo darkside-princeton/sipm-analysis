@@ -7,6 +7,14 @@ import sipm.util.functions as func
 
 class WaveformAnalyzer():
     def __init__(self, id, pol, path, samples):
+        """Class that analyzes the waveform data to obtain higher-level information.
+
+        Args:
+            id (int): Channel number
+            pol (int): Polarity
+            path (str): Data folder path
+            samples (int): Length of acquisition window
+        """
         self.path = path
         self.id = id
         self.pol = pol
@@ -22,6 +30,8 @@ class WaveformAnalyzer():
         self.traces = []
         self.ar_filtered_traces = []
         self.timestamp = []
+        self.trigger_position = 0
+        self.output = {}
     
     def read_data(self, header=True, num_events=1e9):
         """Reads data from the binary wavedump file storing the waveforms.
@@ -52,10 +62,20 @@ class WaveformAnalyzer():
             file.close()
         self.traces = np.array(self.traces).astype(float)     
         self.time = np.arange(0,self.sample_step*self.samples,self.sample_step)
+        self.trigger_position = np.argmax(self.pol*np.mean(self.traces, axis=0))
 
     def baseline_subtraction(self, samples=500):
+        """Computes baseline mean and rms and subtracts baseline mean from raw waveform
+
+        Args:
+            samples (int, optional): Baseline evaluation window starting from the beginning of acquisition. Defaults to 500.
+        """
+        self.output['baseline_mean'] = []
+        self.output['baseline_rms'] = []
         for ii,x in enumerate(self.traces):
             baseline = np.mean(self.traces[ii][:samples])
+            self.output['baseline_mean'].append(baseline)
+            self.output['baseline_rms'].append(np.std(self.traces[ii][:samples]))
             self.traces[ii] -= baseline
             self.traces[ii] *= self.pol
 
@@ -69,6 +89,11 @@ class WaveformAnalyzer():
             self.traces[ii] = scipy.signal.filtfilt(*self.filt_pars, x)
     
     def ar_filter(self, tau):
+        """Matched filter using auto-regressive algorithm
+
+        Args:
+            tau (float): Time constant in units of sample.
+        """
         wf_filt = np.zeros(self.traces.transpose().shape)
         for i,raw in enumerate(list(reversed(self.traces.transpose()))):
             if i>0:
@@ -78,6 +103,15 @@ class WaveformAnalyzer():
         self.ar_filtered_traces = np.array(list(reversed(wf_filt))).transpose()
     
     def get_waveforms(self, ev=[], ar_filter=True):
+        """Return several baseline-subtracted waveforms
+
+        Args:
+            ev (list, optional): A list of event ids. Defaults to [].
+            ar_filter (bool, optional): Whether to return ar-filtered waveforms. Defaults to True.
+
+        Returns:
+            list, list: baseline-subtracted waveforms, ar-filtered waveforms
+        """
         if self.traces==[]:
             self.read_data()
             self.baseline_subtraction()
@@ -120,23 +154,56 @@ class WaveformAnalyzer():
             self.ap_charge_hist.append(ap_charge_hist)
             self.ap_charge_hist_bin.append(ap_charge_hist_bin)
 
-    def get_max(self, traces=None):
-        if traces == None:
-            traces = self.traces
-        self.peak = []
-        self.peak_pos = []
-        for ii,x in enumerate(traces):
-            self.peak.append(np.max(x))
-            self.peak_pos.append(np.argmax(x))
+    def get_max(self, traces=None, ar=False, trig=False):
+        """Evaluate amplitude.
 
-    def get_integral(self, traces=None):
+        Args:
+            traces (_type_, optional): _description_. Defaults to None.
+            ar (bool, optional): Whether to use AR filter. Defaults to False.
+            trig (bool, optional): Whether to confine the evaluation within 20 samples from the trigger position (average maximum position). Defaults to False.
+        """
+        if traces == None:
+            if ar:
+                traces = self.ar_filtered_traces
+            else:
+                traces = self.traces
+        if trig:
+            self.output['amplitude_trig'] = []
+            self.output['peakpos_trig'] = []
+            for ii,x in enumerate(traces):
+                self.output['amplitude_trig'].append(np.max(x[self.trigger_position-20:self.trigger_position+20]))
+                self.output['peakpos_trig'].append(self.trigger_position-20+np.argmax(x[self.trigger_position-20:self.trigger_position+20]))
+        else:
+            self.output['amplitude'] = []
+            self.output['peakpos'] = []
+            for ii,x in enumerate(traces):
+                self.output['amplitude'].append(np.max(x))
+                self.output['peakpos'].append(np.argmax(x))
+
+    def get_integral(self, traces=None, length_us=[]):
+        """Evaluate charge integral.
+
+        Args:
+            traces (_type_, optional): _description_. Defaults to None.
+            length_us (list, optional): A list of integration time windows. Defaults to [].
+        """
         if traces == None:
             traces = self.traces
-        self.integral = []
-        for ii,x in enumerate(traces):
-            self.integral.append(np.sum(x[1500:]))
-            # self.integral.append(np.sum(x[self.peak_pos[ii]-50:]))
-            # self.integral.append(np.sum(x))
+        if len(length_us)==0:
+            self.output['integral'] = []
+            for ii,x in enumerate(traces):
+                self.output['integral'].append(np.sum(x[1500:]))
+                # self.integral.append(np.sum(x[self.peak_pos[ii]-50:]))
+                # self.integral.append(np.sum(x))
+        else:
+            for length in length_us:
+                length_digits = str(int(length*100))
+                while len(length_digits)<3:
+                    length_digits = '0'+length_digits
+                name = f'integral_{length_digits[:-2]}p{length_digits[-2:]}us'
+                self.output[name] = []
+                for ii,x in enumerate(traces):
+                    self.output[name].append(np.sum(x[self.trigger_position-10:self.trigger_position+int(length/self.sample_step)]))
 
     def rolling_baseline(self):
         return 0
