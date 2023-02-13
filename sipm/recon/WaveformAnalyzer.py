@@ -48,7 +48,7 @@ class WaveformAnalyzer():
             print(f)
             file = open(f, 'rb')
             if header:
-                for i in range(1000000):
+                for i in range(num_events):
                     self.header = np.fromfile(file, dtype=np.dtype('I'), count=6)
                     if len(self.header) == 0 or i==num_events:
                         break
@@ -62,7 +62,8 @@ class WaveformAnalyzer():
                 self.traces = self.traces[:cutoff].reshape((-1,self.samples)).astype(float)
             file.close()
         self.traces = np.array(self.traces).astype(float)
-        self.nevents = self.traces.shape[0]     
+        self.nevents = self.traces.shape[0]
+        print(f'{self.nevents} events')     
         self.time = np.arange(0,self.sample_step*self.samples,self.sample_step)
         self.trigger_position = np.argmax(self.pol*np.mean(self.traces, axis=0))
 
