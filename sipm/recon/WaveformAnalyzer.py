@@ -31,6 +31,7 @@ class WaveformAnalyzer():
         self.ar_filtered_traces = []
         self.timestamp = []
         self.trigger_position = 0
+        self.nevents = 0
         self.output = {}
     
     def read_data(self, header=True, num_events=1e9):
@@ -60,7 +61,8 @@ class WaveformAnalyzer():
                 cutoff = -len(self.traces)%self.samples
                 self.traces = self.traces[:cutoff].reshape((-1,self.samples)).astype(float)
             file.close()
-        self.traces = np.array(self.traces).astype(float)     
+        self.traces = np.array(self.traces).astype(float)
+        self.nevents = self.traces.shape[0]     
         self.time = np.arange(0,self.sample_step*self.samples,self.sample_step)
         self.trigger_position = np.argmax(self.pol*np.mean(self.traces, axis=0))
 

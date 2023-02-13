@@ -86,6 +86,7 @@ class IO():
         if not os.path.isdir(self.scratch):
             os.makedirs(f"{self.scratch}")
 
+        # data output for individual channels
         for i in self.d.channels:
             data = self.d.ch[i].output
             print('keys: ',data.keys())
@@ -104,3 +105,23 @@ class IO():
             store.put(f"{metadata['volt']}/{i}", df, format='t', append=True, data_columns=True)
             store.get_storer(f"{metadata['volt']}/{i}").attrs.metadata = metadata
             store.close()
+
+        # data output for all channels (e.g. total pe, fprompt)
+        data = self.d.output
+        print('keys: ',data.keys())
+        
+        df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
+
+        metadata = self.get_metadata(self.filename)
+        run_number = self.get_run_number(self.filename)
+        print("run number is: ", run_number)
+
+        tag = ""
+        for x,y in metadata.items():
+            tag += f"_{x}_{y}"
+
+        store = pd.HDFStore(f"{self.scratch}/{self.date}{tag}_run{run_number}.h5")
+        store.put(f"{metadata['volt']}", df, format='t', append=True, data_columns=True)
+        store.get_storer(f"{metadata['volt']}").attrs.metadata = metadata
+        store.close()
+        
