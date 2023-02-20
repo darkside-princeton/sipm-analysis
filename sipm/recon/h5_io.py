@@ -105,11 +105,12 @@ class IO():
             print('keys: ',data.keys())
             
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
+            print('df=',df)
 
             self.set_h5_filename(wf)
             
             store = pd.HDFStore(self.h5_filename)
-            store.put(f"{self.metadata['volt']}/{i}", df, format='t', append=True, data_columns=True)
+            store.put(f"{self.metadata['volt']}/{i}", df, format='t', append=False, data_columns=True)
             store.get_storer(f"{self.metadata['volt']}/{i}").attrs.metadata = self.metadata
             store.close()
 
