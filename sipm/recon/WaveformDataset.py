@@ -138,8 +138,13 @@ class WaveformDataset:
                 (np.array(self.ch[i].output['integral'])<6*self.gain[i])
             # Store SPE average waveform and number of selected waveforms
             self.ch[i].output['n_spe_wfs'] = np.sum(cut)
-            self.ch[i].output['avg_spe_wf'] = np.dot(self.ch[i].traces.T,cut)
+            self.ch[i].output['avg_spe_wf'] = np.dot(self.ch[i].traces.T,cut)/self.ch[i].output['n_spe_wfs']
             self.ch[i].output['time'] = self.ch[i].time
+            self.ch[i].output.pop('baseline_mean')
+            self.ch[i].output.pop('baseline_rms')
+            self.ch[i].output.pop('amplitude_trig')
+            self.ch[i].output.pop('peakpos_trig')
+            self.ch[i].output.pop('integral')
         self.clear()
 
     def process_scintillation_pulses(self, header=True, num_events=1e9, calib=""):
