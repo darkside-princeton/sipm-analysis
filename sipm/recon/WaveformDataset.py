@@ -140,6 +140,7 @@ class WaveformDataset:
             self.ch[i].output['n_spe_wfs'] = np.sum(cut)
             self.ch[i].output['avg_spe_wf'] = np.dot(self.ch[i].traces.T,cut)/self.ch[i].output['n_spe_wfs']
             self.ch[i].output['time'] = self.ch[i].time
+            # Clean up unnecessary variables
             self.ch[i].output.pop('baseline_mean')
             self.ch[i].output.pop('baseline_rms')
             self.ch[i].output.pop('amplitude_trig')
@@ -174,7 +175,34 @@ class WaveformDataset:
             fprompt (list, optional): Range of f_prompt. Defaults to [0.1,0.6].
             pe (list, optional): Range of PEs. Defaults to [300,700].
         """
-        pass
+        self.read_calibration(calib)
+        for i in self.channels:
+            self.ch[i].read_data(header=header, num_events=num_events)
+            self.ch[i].baseline_subtraction(samples=self.ch[i].trigger_position-int(0.5/self.ch[i].sample_step))
+            self.ch[i].get_integral(length_us=[0.5,5]) # 0.5us for Fprompt analysis
+        self.get_total_pe()
+        self.get_fprompt()
+        # Make cut on total pe, fprompt, baseline rms of all the channels
+        cut = (np.array(self.output['total_pe'])<pe[1]) & \
+            (np.array(self.output['total_pe'])>pe[0]) & \
+            (np.array(self.output['fprompt'])<fprompt[1]) & \
+            (np.array(self.output['fprompt'])>fprompt[0])
+        for i in self.channels:
+            cut = cut & (np.array(self.ch[i].output['baseline_rms'])<2.5)
+        # Store average LAr scintillation waveform and number of selected waveforms
+        for i in self.channels:
+            self.ch[i].output['n_scint_wfs'] = np.sum(cut)
+            self.ch[i].output['avg_scint_wf'] = np.dot(self.ch[i].traces.T,cut)/self.ch[i].output['n_scint_wfs']
+            self.ch[i].output['time'] = self.ch[i].time
+        # Clean up unnecessary variables
+        self.output.pop('total_pe')
+        self.output.pop('fprompt')
+        for i in self.channels:
+            self.ch[i].output.pop('baseline_mean')
+            self.ch[i].output.pop('baseline_rms')
+            self.ch[i].output.pop('integral_0p50us')
+            self.ch[i].output.pop('integral_5p00us')
+        self.clear()
 
     def sum_traces(self, clear=True):
         self.sum = wfa.WaveformAnalyzer(id=-1, pol=self.pol, path=self.path, samples=self.samples)
