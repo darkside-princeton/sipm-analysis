@@ -5,6 +5,7 @@ This repository contains the code for performing waveform analysis of SiPM data 
 
 * [Installation](/doc/installation.md)
 * [Running on the Princeton Della Cluster](/doc/della.md)
+* [Running the analyses](/doc/analysis.md)
 
 
 # Contact 
