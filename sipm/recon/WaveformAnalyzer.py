@@ -48,7 +48,7 @@ class WaveformAnalyzer():
             print(f)
             file = open(f, 'rb')
             if header:
-                for i in range(num_events):
+                for i in range(int(num_events)):
                     self.header = np.fromfile(file, dtype=np.dtype('I'), count=6)
                     if len(self.header) == 0 or i==num_events:
                         break
