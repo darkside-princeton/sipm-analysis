@@ -55,7 +55,7 @@ class IO():
             filename = path[index:].split('/')[0]
             indices_object = re.finditer(pattern='_', string=filename)
             indices = [index.start() for index in indices_object]
-            if len(indices) < 2:
+            if len(indices) < 2 or tag=='cond':#condition description can contain multiple words separated by _
                 tag_dict[tag] = filename[indices[0]+1:]
             else:
                 tag_dict[tag] = filename[indices[0]+1:indices[1]]
