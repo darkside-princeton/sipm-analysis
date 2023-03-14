@@ -14,7 +14,6 @@ def main():
     d = wfd.WaveformDataset(path=args.file_dir)
 
     # Run the standard analysis on the dataset
-    # test
     d.analyze(num_events=args.num_events, clear=args.clear, sum=args.sum)
 
     # Create a IO objects to save the high level information
