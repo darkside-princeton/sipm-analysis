@@ -55,7 +55,7 @@ class IO():
             filename = path[index:].split('/')[0]
             indices_object = re.finditer(pattern='_', string=filename)
             indices = [index.start() for index in indices_object]
-            if len(indices) < 2:
+            if len(indices) < 2 or tag=='cond':#condition description can contain multiple words separated by _
                 tag_dict[tag] = filename[indices[0]+1:]
             else:
                 tag_dict[tag] = filename[indices[0]+1:indices[1]]
@@ -73,8 +73,21 @@ class IO():
         indices = [index.start() for index in indices_object]
         run_number = np.where((np.diff(indices)<4) & (np.diff(indices)>1))[0][0]
         return path[indices[run_number]+1:indices[run_number+1]]
+
+    def set_h5_filename(self,wf=False):
+        self.metadata = self.get_metadata(self.filename)
+        self.run_number = self.get_run_number(self.filename)
+        print("run number is: ", self.run_number)
+
+        tag = ""
+        for x,y in self.metadata.items():
+            tag += f"_{x}_{y}"
+        if wf:
+            self.h5_filename = f"{self.scratch}/{self.date}{tag}_run{self.run_number}_wf.h5"
+        else:
+            self.h5_filename = f"{self.scratch}/{self.date}{tag}_run{self.run_number}.h5"
     
-    def save(self):
+    def save(self, wf=False):
         """Saving the relevant parameters to a HDF5 file for further analysis. 
         Parameters
         ----------
@@ -92,36 +105,24 @@ class IO():
             print('keys: ',data.keys())
             
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
+            print('df=',df)
 
-            metadata = self.get_metadata(self.filename)
-            run_number = self.get_run_number(self.filename)
-            print("run number is: ", run_number)
-
-            tag = ""
-            for x,y in metadata.items():
-                tag += f"_{x}_{y}"
-
-            store = pd.HDFStore(f"{self.scratch}/{self.date}{tag}_run{run_number}.h5")
-            store.put(f"{metadata['volt']}/{i}", df, format='t', append=True, data_columns=True)
-            store.get_storer(f"{metadata['volt']}/{i}").attrs.metadata = metadata
+            self.set_h5_filename(wf)
+            
+            store = pd.HDFStore(self.h5_filename)
+            store.put(f"{self.metadata['volt']}/{i}", df, format='t', append=False, data_columns=True)
+            store.get_storer(f"{self.metadata['volt']}/{i}").attrs.metadata = self.metadata
             store.close()
 
         # data output for all channels (e.g. total pe, fprompt)
-        data = self.d.output
-        print('keys: ',data.keys())
-        
-        df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
+        if self.d.output!={}:
+            data = self.d.output
+            print('keys: ',data.keys())
+            
+            df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
 
-        metadata = self.get_metadata(self.filename)
-        run_number = self.get_run_number(self.filename)
-        print("run number is: ", run_number)
-
-        tag = ""
-        for x,y in metadata.items():
-            tag += f"_{x}_{y}"
-
-        store = pd.HDFStore(f"{self.scratch}/{self.date}{tag}_run{run_number}.h5")
-        store.put(f"{metadata['volt']}", df, format='t', append=True, data_columns=True)
-        store.get_storer(f"{metadata['volt']}").attrs.metadata = metadata
-        store.close()
+            store = pd.HDFStore(self.h5_filename)
+            store.put(f"{self.metadata['volt']}", df, format='t', append=True, data_columns=True)
+            store.get_storer(f"{self.metadata['volt']}").attrs.metadata = self.metadata
+            store.close()
         

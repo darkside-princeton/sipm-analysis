@@ -48,7 +48,7 @@ class WaveformAnalyzer():
             print(f)
             file = open(f, 'rb')
             if header:
-                for i in range(num_events):
+                for i in range(int(num_events)):
                     self.header = np.fromfile(file, dtype=np.dtype('I'), count=6)
                     if len(self.header) == 0 or i==num_events:
                         break
@@ -195,7 +195,7 @@ class WaveformAnalyzer():
         if len(length_us)==0:
             self.output['integral'] = []
             for ii,x in enumerate(traces):
-                self.output['integral'].append(np.sum(x[1500:]))
+                self.output['integral'].append(np.sum(x[self.trigger_position-10:]))
                 # self.integral.append(np.sum(x[self.peak_pos[ii]-50:]))
                 # self.integral.append(np.sum(x))
         else:

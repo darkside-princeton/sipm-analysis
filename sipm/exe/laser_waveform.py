@@ -10,7 +10,7 @@ args = parser.parse_args()
 
 def main():
     # Create new dataset object
-    d = wfd.WaveformDataset(path=args.file_dir)
+    d = wfd.WaveformDataset(path=args.file_dir, samples=4000)
 
     # Run waveform shape analysis on laser data
     d.process_laser_waveforms(num_events=args.num_events, calib=args.sipm_calib_dir)
@@ -19,7 +19,7 @@ def main():
     io = h5_io.IO(dataset=d)
 
     # Save data to HDF5
-    io.save()
+    io.save(wf=True)
 
 if __name__ == "__main__":
     main()
