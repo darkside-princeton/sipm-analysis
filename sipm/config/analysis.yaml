@@ -1,4 +1,5 @@
-files: /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2022-11-22/**/*/
+files:
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2022-11-22/**/*/
 num_events: 1000000000
 script: sipm/exe/analysis.py
 description: An example script for data pre-processing

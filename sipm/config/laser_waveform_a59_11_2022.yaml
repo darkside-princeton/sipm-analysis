@@ -1,4 +1,5 @@
-files: /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2022-11-22/**/*/
+files:
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2022-11-22/**/*/
 num_events: 100000
 sipm_calib_dir: /home/as111/sipm-analysis/data/calibration/
 script: sipm/exe/laser_waveform.py
