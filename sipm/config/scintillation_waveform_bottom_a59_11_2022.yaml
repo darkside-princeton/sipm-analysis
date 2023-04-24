@@ -1,4 +1,5 @@
-files: /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2022-11-20/*pos_bottom*/*/
+files:
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2022-11-20/*pos_bottom*/*/
 num_events: 100000
 sipm_calib_dir: /home/as111/sipm-analysis/data/calibration/
 fprompt_range:
