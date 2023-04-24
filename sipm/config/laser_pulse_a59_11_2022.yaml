@@ -1,0 +1,4 @@
+files: /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2022-11-22/**/*/
+num_events: 1000000000
+script: sipm/exe/laser_pulse.py
+description: Pre-processing laser calibration data taken in November 2022 for Tyvek A59 measurements
