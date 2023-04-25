@@ -120,9 +120,10 @@ class IO():
             print('keys: ',data.keys())
             
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
+            print('df=',df)
 
             store = pd.HDFStore(self.h5_filename)
-            store.put(f"{self.metadata['volt']}", df, format='t', append=True, data_columns=True)
+            store.put(f"{self.metadata['volt']}", df, format='t', append=False, data_columns=True)
             store.get_storer(f"{self.metadata['volt']}").attrs.metadata = self.metadata
             store.close()
         
