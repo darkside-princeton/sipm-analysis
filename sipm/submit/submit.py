@@ -1,5 +1,5 @@
 import glob
-import sipm.util.submit as submit
+import sipm.util.scheduler as scheduler
 import yaml
 import argparse
 
@@ -15,7 +15,7 @@ dirs = []
 for _ in conf['files']:
     dirs += glob.glob(_)
 
-scheduler = submit.Scheduler(dirs=dirs)
+scheduler = scheduler.Scheduler(dirs=dirs)
 
 if conf['script'] == 'sipm/exe/analysis.py':
     scheduler.submit(script=conf['script'],args=f"-n {conf['num_events']}")
