@@ -10,8 +10,8 @@ Data pre-processing is performed with the Python scripts under ``sipm/exe/``. On
 python sipm/submit/submit.py -c sipm/config/analysis.yaml
 ```
 
-| Config. File | Description | Pre-processing | Higher-level analysis |
-| ------------ | ----------- | -------------- | --------------------- |
+| Config. File | Description | Higher-level analysis | Pre-processing |
+| ------------ | ----------- | --------------------- | -------------- |
 | sipm/config/analysis.yaml | A minimal example | jupyter/io.ipynb | sipm/exe/analysis.py |
 | sipm/config/laser_pulse_a59_11_2022.yaml | Laser calibration | jupyter/calibration.ipynb | sipm/exe/laser_pulse.py |
 | sipm/config/laser_waveform_a59_11_2022.yaml | SiPM single PE pulse shape | jupyter/triplet_lifetime.ipynb | sipm/exe/laser_waveform.py |
