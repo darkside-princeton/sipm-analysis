@@ -1,0 +1,9 @@
+files:
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2022-11-20/**/*/
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2022-11-18/**_no_gamma/*/
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2022-11-17/*pos_top*cond_gamma/*/
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2022-11-15/2022-11-15_volt_65_pos_top_light_scintillation_coinc_111_cond_gamma_high_stat/*/
+num_events: 100000
+calibration: /home/as111/sipm-analysis/data/calibration/calibration_liq2_*.csv
+script: sipm/exe/scintillation_pulse.py
+description: Pre-processing scintillation data taken in November 2022 for Tyvek A59 measurements (Liquefaction 2)

@@ -1,0 +1,12 @@
+files:
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2022-11-20/*pos_top*/*/
+num_events: 100000
+sipm_calib_dir: /home/as111/sipm-analysis/data/calibration/
+fprompt_range:
+- 0.1
+- 0.5
+pe_range:
+- 20
+- 200
+script: sipm/exe/scintillation_waveform.py
+description: Pre-processing scintillation data (waveform shape, top tile) taken in November 2022 for Tyvek A59 measurements (Liquefaction 2)
