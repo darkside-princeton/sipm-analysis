@@ -1,6 +1,6 @@
 files:
 - /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2022-11-22/**/*/
 num_events: 100000
-calibration: /home/as111/sipm-analysis/data/calibration/calibration_liq2_*.csv
+calibration: /home/as111/sipm-analysis/data/calibration_liq2/
 script: sipm/exe/laser_waveform.py
 description: Pre-processing laser calibration data (single photo-electron pulse shape) taken in November 2022 for Tyvek A59 measurements (Liquefaction 2)

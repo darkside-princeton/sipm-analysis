@@ -2,7 +2,7 @@ files:
 - /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/*/*pos_top*cond_gamma*/*/
 - /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/*/*pos_top*cond_with_gamma*/*/
 num_events: 100000
-calibration: /home/as111/sipm-analysis/data/calibration/calibration_liq2_*.csv
+calibration: /home/as111/sipm-analysis/data/calibration_liq2/
 fprompt_range:
 - 0.1
 - 0.5
