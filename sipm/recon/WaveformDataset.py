@@ -44,7 +44,7 @@ class WaveformDataset:
         self.gain = []
         self.a1min = []
         self.a1max = []
-        calib_files = glob.glob(calib_dir)
+        calib_files = glob.glob(f'{calib_dir}*.csv')
         i = 0
         found = False
         while i<len(calib_files) and not found:
