@@ -44,6 +44,7 @@ class WaveformDataset:
         self.gain = []
         self.a1min = []
         self.a1max = []
+        self.bslrms = []
         calib_files = glob.glob(f'{calib_dir}*.csv')
         i = 0
         found = False
@@ -64,15 +65,18 @@ class WaveformDataset:
                                 self.gain.append(float(row[7])*(1+float(row[9]))/(1-float(row[3])))
                                 self.a1min.append(float(row[1]))
                                 self.a1max.append(float(row[2]))
+                                self.bslrms.append(float(row[11]))
                         elif self.pos=='bottom':
                             if line_count>4:
                                 self.gain.append(float(row[7])*(1+float(row[9]))/(1-float(row[3])))
                                 self.a1min.append(float(row[1]))
                                 self.a1max.append(float(row[2]))
+                                self.bslrms.append(float(row[11]))
                     line_count += 1
             print(f'Gain of {self.pos} SiPMs @{self.volt}V: {self.gain[0]:.2f} {self.gain[1]:.2f} {self.gain[2]:.2f} {self.gain[3]:.2f}')
             print(f'A1min of {self.pos} SiPMs @{self.volt}V: {self.a1min[0]:.2f} {self.a1min[1]:.2f} {self.a1min[2]:.2f} {self.a1min[3]:.2f}')
             print(f'A1max of {self.pos} SiPMs @{self.volt}V: {self.a1max[0]:.2f} {self.a1max[1]:.2f} {self.a1max[2]:.2f} {self.a1max[3]:.2f}')
+            print(f'Baseline RMS threshold of {self.pos} SiPMs @{self.volt}V: {self.bslrms[0]:.2f} {self.bslrms[1]:.2f} {self.bslrms[2]:.2f} {self.bslrms[3]:.2f}')
         else:
             print('No calibration csv file. Use default gain of 500.')
             self.gain = [500]*4
@@ -140,7 +144,7 @@ class WaveformDataset:
             self.ch[i].get_max(ar=True, trig=True) # AR matched filter, maximum near trigger position
             self.ch[i].get_integral() # full integral (from trigger-10 samples to end)
             # Make cut on filtered amplitude->SPE, baseline rms->pre-trigger pulses, and total integral->post-trigger scintillation pulses
-            cut = (np.array(self.ch[i].output['baseline_rms'])<2.5) & \
+            cut = (np.array(self.ch[i].output['baseline_rms'])<self.bslrms[i]) & \
                 (np.array(self.ch[i].output['amplitude_trig'])<self.a1max[i]) & \
                 (np.array(self.ch[i].output['amplitude_trig'])>self.a1min[i]) & \
                 (np.array(self.ch[i].output['integral'])<6*self.gain[i])
