@@ -71,8 +71,13 @@ class IO():
         """
         indices_object = re.finditer(pattern='/', string=path)
         indices = [index.start() for index in indices_object]
-        run_number = np.where((np.diff(indices)<4) & (np.diff(indices)>1))[0][0]
-        return path[indices[run_number]+1:indices[run_number+1]]
+        arr = np.where((np.diff(indices)<4) & (np.diff(indices)>1))[0]
+        if arr.shape[0]>0:
+            run_number = arr[0]
+            return path[indices[run_number]+1:indices[run_number+1]]
+        else:
+            return '0'
+        
 
     def set_h5_filename(self,wf=False):
         self.metadata = self.get_metadata(self.filename)
