@@ -22,10 +22,10 @@ if conf['script'] == 'sipm/exe/analysis.py':
 elif conf['script'] == 'sipm/exe/laser_pulse.py':
     scheduler.submit(script=conf['script'],args=f"-n {conf['num_events']}")
 elif conf['script'] == 'sipm/exe/scintillation_pulse.py':
-    scheduler.submit(script=conf['script'],args=f"-n {conf['num_events']} -s {conf['sipm_calib_dir']}")
+    scheduler.submit(script=conf['script'],args=f"-n {conf['num_events']} -s {conf['calibration']}")
 elif conf['script'] == 'sipm/exe/laser_waveform.py':
-    scheduler.submit(script=conf['script'],args=f"-n {conf['num_events']} -s {conf['sipm_calib_dir']}")
+    scheduler.submit(script=conf['script'],args=f"-n {conf['num_events']} -s {conf['calibration']}")
 elif conf['script'] == 'sipm/exe/scintillation_waveform.py':
     if 'cpu_memory' in conf:
         scheduler.cpu_memory=conf['cpu_memory']
-    scheduler.submit(script=conf['script'],args=f"-n {conf['num_events']} -s {conf['sipm_calib_dir']} -p {conf['fprompt_range'][0]} {conf['fprompt_range'][1]} -e {conf['pe_range'][0]} {conf['pe_range'][1]}")
+    scheduler.submit(script=conf['script'],args=f"-n {conf['num_events']} -s {conf['calibration']} -p {conf['fprompt_range'][0]} {conf['fprompt_range'][1]} -e {conf['pe_range'][0]} {conf['pe_range'][1]}")

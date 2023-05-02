@@ -44,9 +44,17 @@ class WaveformDataset:
         self.gain = []
         self.a1min = []
         self.a1max = []
-        print(f'Calibration csv file: {calib_dir}calibration_1122_{self.volt}V.csv')
-        try:
-            with open(f'{calib_dir}calibration_1122_{self.volt}V.csv') as f:
+        calib_files = glob.glob(f'{calib_dir}*.csv')
+        i = 0
+        found = False
+        while i<len(calib_files) and not found:
+            ind = calib_files[i].find('V.csv')
+            if ind!=-1 and int(calib_files[i][ind-2:ind])==self.volt:
+                found = True
+            i += 1
+        if found:
+            print(f'Calibration csv file: {calib_files[i-1]}')
+            with open(calib_files[i-1]) as f:
                 r = csv.reader(f)
                 line_count = 0
                 for row in r:
@@ -65,7 +73,7 @@ class WaveformDataset:
             print(f'Gain of {self.pos} SiPMs @{self.volt}V: {self.gain[0]:.2f} {self.gain[1]:.2f} {self.gain[2]:.2f} {self.gain[3]:.2f}')
             print(f'A1min of {self.pos} SiPMs @{self.volt}V: {self.a1min[0]:.2f} {self.a1min[1]:.2f} {self.a1min[2]:.2f} {self.a1min[3]:.2f}')
             print(f'A1max of {self.pos} SiPMs @{self.volt}V: {self.a1max[0]:.2f} {self.a1max[1]:.2f} {self.a1max[2]:.2f} {self.a1max[3]:.2f}')
-        except:
+        else:
             print('No calibration csv file. Use default gain of 500.')
             self.gain = [500]*4
             pass

@@ -1,0 +1,6 @@
+files:
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2023-05-01/*/
+num_events: 100000
+calibration: /home/as111/sipm-analysis/data/calibration_liq3/
+script: sipm/exe/scintillation_pulse.py
+description: Pre-processing scintillation data taken in April-May 2023 for Tyvek I59 measurements (Liquefaction 3)
