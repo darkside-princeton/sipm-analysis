@@ -2,6 +2,7 @@ import numpy as np
 import sipm.recon.WaveformAnalyzer as wfa
 import glob
 import csv
+from datetime import datetime
 
 class WaveformDataset: 
     def __init__(self,  path, pol=-1, channels=[0,1,2,3], samples=3000):
@@ -20,9 +21,31 @@ class WaveformDataset:
         self.pol = pol
         self.pos = ''
         self.volt = 0
-        self.ch = self.InitializeChannels()
         self.output = {}
+        self.read_timestamp()
+        self.ch = self.InitializeChannels()
         
+    def read_timestamp(self):
+        format_str = '%Y/%m/%d %H:%M:%S'
+        with open(f'{self.path}time.txt', 'r') as f:
+            lines = f.readlines()
+        self.start_datetime = datetime.strptime(lines[0][:-1],format_str)
+        self.output['start_datetime'] = np.array([self.start_datetime.year,
+                                                  self.start_datetime.month, 
+                                                  self.start_datetime.day,
+                                                  self.start_datetime.hour,
+                                                  self.start_datetime.minute,
+                                                  self.start_datetime.second]).astype(float)
+        self.end_datetime = datetime.strptime(lines[1][:-1],format_str)
+        self.output['end_datetime'] = np.array([self.end_datetime.year,
+                                                self.end_datetime.month,
+                                                self.end_datetime.day,
+                                                self.end_datetime.hour,
+                                                self.end_datetime.minute,
+                                                self.end_datetime.second]).astype(float)
+        self.duration_seconds = float(lines[2][:-2])
+        self.output['duration_seconds'] = np.array([self.duration_seconds]).astype(float)
+
     def InitializeChannels(self):
         channels = []
         for i in self.channels:
