@@ -1,0 +1,13 @@
+files:
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2023-05-04/*pos_bottom*cond_gamma*/*/
+num_events: 100000
+calibration: /home/as111/sipm-analysis/data/calibration_liq3/
+fprompt_range:
+- 0
+- 1
+pe_range:
+- 20
+- 500
+cpu_memory: 16
+script: sipm/exe/scintillation_waveform.py
+description: Pre-processing scintillation data (triplet lifetime evolution, bottom tile) taken in April-May 2023 for Tyvek I59 measurements (Liquefaction 3)
