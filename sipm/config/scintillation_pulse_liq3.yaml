@@ -1,5 +1,5 @@
 files:
-- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2023-05-12/**coinc_software*/*/
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2023-05-19/*cond_no_gamma*/*/
 num_events: 100000
 calibration: /home/as111/sipm-analysis/data/calibration_liq3/
 script: sipm/exe/scintillation_pulse.py
