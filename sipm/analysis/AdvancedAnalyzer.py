@@ -2,6 +2,7 @@ from typing import Dict
 import glob
 import pandas as pd
 import yaml
+import numpy as np
 
 class AdvancedAnalyzer:
     """The parent class for the post-analysis code.
@@ -23,6 +24,7 @@ class AdvancedAnalyzer:
         self.wf = wf
         self.merge = merge
         self.verbose = verbose
+        self.baseline = {}
 
     def print_info(self):
         print('\nData structure:')
@@ -35,10 +37,17 @@ class AdvancedAnalyzer:
         else:
             files = glob.glob(f"{self.directory}{date}/{date}_volt_{volt}_pos_{pos}_light_{light}_coinc_{coinc}_cond_{cond}_run{run}[!_wf].h5")
         for f in files:
+            ind = f.find('run')+3
+            if self.wf:
+                run_number = int(f[ind:f.find('_',ind)])
+            else:
+                run_number = int(f[ind:f.find('.',ind)])
             df = pd.read_hdf(f, key=f'{volt}/{ch}')
+            df['event'] = df.index
+            df['run'] = np.array([run_number]*df.shape[0])
             data.append(df)
         if len(files)>0 and self.merge:
-            data = pd.concat(data, ignore_index=True)
+            data = pd.concat(data, ignore_index=True).sort_values(by=['run','event']).reset_index(drop=True)
         if self.verbose:
             if len(files)==0:
                 events = 0
@@ -75,6 +84,33 @@ class AdvancedAnalyzer:
                 self.metadata_dfs(v,mydata[k],myproto[k])
         else:
             m = mydict['metadata']
+            mydata['metadata'] = mydict['metadata']
             mydata['data'] = self.load_file(m['date'],m['volt'],m['pos'],m['light'],m['coinc'],m['cond'],m['run'],m['ch'])
             for k in mydata['data'].keys():
                 myproto[k] = '###'
+                
+    def baseline_analysis(self, threshold_dict):
+        self.bsl_rms_thre = threshold_dict
+        self.baseline_cut_dfs(threshold_dict, self.data, self.baseline)
+    
+    def baseline_cut_dfs(self, mythre, mydata, mybsl):
+        if 'data' not in mydata:
+            for k,v in mydata.items():
+                mybsl[k] = {}
+                self.baseline_cut_dfs(mythre[k],v,mybsl[k])
+        else:
+            data = mydata['data']
+            data['bsl_cut'] = data['baseline_rms']<mythre
+            mybsl['rms_threshold'] = mythre
+            nbins = 500
+            range_min = 0
+            range_max = 5
+            mybsl['rms_hist'], mybsl['rms_bins'] = np.histogram(data['baseline_rms'], bins=nbins, range=(range_min, range_max))
+            nbins = 1500
+            range_min = 3720
+            range_max = 3850
+            mybsl['mean_hist'], mybsl['mean_bins'] = np.histogram(data['baseline_mean'], bins=nbins, range=(range_min, range_max))
+            mybsl['mean_hist_cut'], mybsl['mean_bins_cut'] = np.histogram(data['baseline_mean'].loc[data['bsl_cut']], bins=nbins, range=(range_min, range_max))
+            mybsl['cut_fraction'] = 1-np.sum(data['bsl_cut'])/data.shape[0]
+            if self.verbose:
+                print(f'{mydata["metadata"]["pos"]} ch{mydata["metadata"]["ch"]} {mydata["metadata"]["volt"]}V cut fraction = {mybsl["cut_fraction"]*100:.5f}%')
