@@ -6,7 +6,21 @@ from scipy.optimize import curve_fit
 import sipm.util.functions as func
 
 class SipmCalibration(AdvancedAnalyzer):
+    """The class for SiPM calibration analysis
+    """
     def __init__(self, positions:List[str], channels:List[int], voltages:List[float], directory:str, metadata_dict:Dict, wf:bool, merge:bool, verbose:bool):
+        """SipmCalibration constructor.
+
+        Args:
+            positions (List[str]): A list of positions (e.g. ['top','bottom'])
+            channels (List[int]): A list of channels (e.g. [0,1,2,3])
+            voltages (List[float]): A list of voltages (e.g. [63,65,67,69,71])
+            directory (str): Directory containing processed HDF5 files
+            metadata_dict (Dict): Metadata used to specify the file names. Arranged into a nested dictionary.
+            wf (bool): Whether the file name ends with '_wf'
+            merge (bool): Whether to merge different runs
+            verbose (bool): Whether to print out more information
+        """
         super().__init__(directory, metadata_dict, wf, merge, verbose)
         self.positions = positions
         self.channels = channels
@@ -33,6 +47,16 @@ class SipmCalibration(AdvancedAnalyzer):
                     self.crosstalk[pos][ch][volt] = {}
                 
     def amplitude_analysis(self, boundary_par_dict, prom=70, wid=10, dist=15, nbins=1500, hist_range=(-1e2, 1.6e3)):
+        """Analyze filtered amplitude histograms.
+
+        Args:
+            boundary_par_dict (Dict): Parameter to set the boundary between different PEs. 0.5=middle point between two peaks. 0=the left peak. 1=the right peak. Arranged into a nested dictionary with the same structure as self.metadata.
+            prom (int, optional): Prominence for the peak finder. Defaults to 70.
+            wid (int, optional): Width for the peak finder. Defaults to 10.
+            dist (int, optional): Distance for the peak finder. Defaults to 15.
+            nbins (int, optional): Number of bins for the histograms. Defaults to 1500.
+            hist_range (tuple, optional): Range for the histogram. Defaults to (-1e2, 1.6e3).
+        """
         # Generate histograms
         bin_width = (hist_range[1]-hist_range[0])/nbins
         for pos in self.positions:
@@ -56,13 +80,6 @@ class SipmCalibration(AdvancedAnalyzer):
                             pe_cuts_in_bins.append(int(1.5*p[0]-0.5*p[1]))
                         else:
                             pe_cuts_in_bins.append(int(bound_par*p[ipe]+(1-bound_par)*p[ipe-1]))
-                            # if pos == 'bottom' and ch == 3:
-                            #     pe_cuts_in_bins.append(int(0.35*p[ipe]+0.65*p[ipe-1]))
-                            # elif pos == 'bottom' and ch == 0:
-                            #     pe_cuts_in_bins.append(int(0.45*p[ipe]+0.55*p[ipe-1]))
-                            # else:
-                            #     pe_cuts_in_bins.append(int(0.5*(p[ipe]+p[ipe-1])))
-                        # if ipe > 0:
                             P_k.append([np.sum(self.amp_hist[pos][ch][volt]['hist'][pe_cuts_in_bins[ipe-1]:pe_cuts_in_bins[ipe]])/nevents,
                                     np.sqrt(np.sum(self.amp_hist[pos][ch][volt]['hist'][pe_cuts_in_bins[ipe-1]:pe_cuts_in_bins[ipe]]))/nevents])
                     self.amp_hist[pos][ch][volt]['boundaries'] = list(
@@ -73,6 +90,8 @@ class SipmCalibration(AdvancedAnalyzer):
                     self.crosstalk[pos][ch][volt]['x'] = np.arange(len(P_k))
 
     def crosstalk_analysis(self):
+        """Perform Vinogradov fit to obtain the direct crosstalk probability.
+        """
         for pos in self.positions:
             for ch in self.channels:
                 for volt in self.voltages:

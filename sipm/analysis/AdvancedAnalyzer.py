@@ -5,16 +5,17 @@ import yaml
 import numpy as np
 
 class AdvancedAnalyzer:
-    """The parent class for the post-analysis code.
+    """The parent class for the post-analysis classes.
     """
     def __init__(self, directory:str, metadata_dict:Dict, wf:bool, merge:bool, verbose:bool):
-        """Constructor.
+        """AdvancedAnalyzer constructor.
 
         Args:
-            dir (str): Directory containing the hdf5 files (e.g. '/scratch/gpfs/as111/results/') \n
-            volts (List[float]): SiPM bias voltage (e.g. [63,65,67,69,71]) \n
-            channels (List[int]): Channel number (e.g. [0,1,2,3]) \n
-            positions (List[str]): Position (e.g. ['top','bottom'])
+            directory (str): Directory containing processed HDF5 files (e.g. '/scratch/gpfs/as111/results/')
+            metadata_dict (Dict): Metadata arranged into a nested dictionary. Need to match the file names. (See jupyter/calibration_liq2.ipynb for example)
+            wf (bool): Whether the file names have a trailing "_wf". True for the files processed with sipm/exe/laser_waveform.py and simp/exe/scintillation_waveform.py. False for the files processed with sipm/exe/laser_pulse.py and sipm/exe/scintillation_pulse.py
+            merge (bool): Whether to merge different different runs.
+            verbose (bool): Whether to print more information.
         """
         self.directory = directory
         self.metadata = metadata_dict
@@ -30,6 +31,21 @@ class AdvancedAnalyzer:
         print(yaml.dump(self.proto_data,default_flow_style=False))
 
     def load_file(self, date:str, volt:float, pos:str, light:str, coinc:str, cond:str, run:int, ch:int):
+        """Load the file specified by the metadata in the arguments. Can use '*' for pattern matching.
+
+        Args:
+            date (str): Date (e.g. '2022-11-22')
+            volt (float): Voltage (e.g. 67)
+            pos (str): Position (e.g. 'top')
+            light (str): Light (e.g. 'scintillation')
+            coinc (str): Coincidence (e.g. '111')
+            cond (str): Condition (e.g. 'calibration')
+            run (int): Run number (e.g. 0)
+            ch (int): Channel number (e.g. 0)
+
+        Returns:
+            pandas.DataFrame: data
+        """
         data = []
         if self.wf:
             files = glob.glob(f"{self.directory}{date}/{date}_volt_{volt}_pos_{pos}_light_{light}_coinc_{coinc}_cond_{cond}_run{run}_wf.h5")
@@ -60,16 +76,7 @@ class AdvancedAnalyzer:
         return data
 
     def load_files(self):
-        """Load pre-processed hdf5 files. Arguments need to match the file name substrings. Can use '*' for pattern matching except for the 'wf' argument.
-
-        Args:
-            date (str): Date (e.g. '2023-05-10') \n
-            light (str): Light source (e.g. 'scintillation') \n
-            coinc (str): Coincidence setting (e.g. '000') \n
-            cond (str): Condition (e.g. 'gamma') \n
-            run (str): Run number (e.g. '0') \n
-            wf (bool): Processed by laser_pulse.py or scintillation_pulse.py = True; processed by laser_waveform.py or scintillation_waveform.py = False. \n
-            verbose (bool): Print messages \n
+        """Load processed HDF5 files specified by self.metadata.
         """
         self.metadata_dfs(self.metadata, self.data, self.proto_data)
         if self.verbose:
@@ -88,7 +95,12 @@ class AdvancedAnalyzer:
             for k in mydata['data'].keys():
                 myproto[k] = '###'
                 
-    def baseline_analysis(self, threshold_dict):
+    def baseline_analysis(self, threshold_dict:Dict):
+        """Apply baseline quality cuts and calculate cut fraction.
+
+        Args:
+            threshold_dict (Dict): Baseline rms thresholds arranged into a nested dictionary with the same structure as self.metadata.
+        """
         self.bsl_rms_thre = threshold_dict
         self.baseline_cut_dfs(threshold_dict, self.data, self.baseline)
     
