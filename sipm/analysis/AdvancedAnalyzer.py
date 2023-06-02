@@ -21,7 +21,6 @@ class AdvancedAnalyzer:
         self.metadata = metadata_dict
         self.data = {}
         self.proto_data = {}
-        self.results = None
         self.wf = wf
         self.merge = merge
         self.verbose = verbose
@@ -107,15 +106,9 @@ class AdvancedAnalyzer:
             data = mydata['data']
             data['bsl_cut'] = data['baseline_rms']<mythre
             mybsl['rms_threshold'] = mythre
-            nbins = 500
-            range_min = 0
-            range_max = 5
-            mybsl['rms_hist'], mybsl['rms_bins'] = np.histogram(data['baseline_rms'], bins=nbins, range=(range_min, range_max))
-            nbins = 1500
-            range_min = 3720
-            range_max = 3850
-            mybsl['mean_hist'], mybsl['mean_bins'] = np.histogram(data['baseline_mean'], bins=nbins, range=(range_min, range_max))
-            mybsl['mean_hist_cut'], mybsl['mean_bins_cut'] = np.histogram(data['baseline_mean'].loc[data['bsl_cut']], bins=nbins, range=(range_min, range_max))
+            mybsl['rms_hist'], mybsl['rms_bins'] = np.histogram(data['baseline_rms'], bins=500, range=(0, 5))
+            mybsl['mean_hist'], mybsl['mean_bins'] = np.histogram(data['baseline_mean'], bins=1500, range=(3720, 3850))
+            mybsl['mean_hist_cut'], mybsl['mean_bins_cut'] = np.histogram(data['baseline_mean'].loc[data['bsl_cut']], bins=1500, range=(3720, 3850))
             mybsl['cut_fraction'] = 1-np.sum(data['bsl_cut'])/data.shape[0]
             if self.verbose:
                 print(f'{mydata["metadata"]["pos"]} ch{mydata["metadata"]["ch"]} {mydata["metadata"]["volt"]}V cut fraction = {mybsl["cut_fraction"]*100:.5f}%')
