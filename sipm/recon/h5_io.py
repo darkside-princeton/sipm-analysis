@@ -48,17 +48,18 @@ class IO():
         path : string
             The directory containing the waveform files.
         """
-        self.tag_list = ['volt', 'pos', 'light', 'coinc', 'cond']
+        self.tag_list = ['volt', 'pos', 'light', 'coinc', 'cond', 'config', 'intensity']
         tag_dict = {}
         for tag in self.tag_list:
             index = path.find(tag)
-            filename = path[index:].split('/')[0]
-            indices_object = re.finditer(pattern='_', string=filename)
-            indices = [index.start() for index in indices_object]
-            if len(indices) < 2 or tag=='cond':#condition description can contain multiple words separated by _
-                tag_dict[tag] = filename[indices[0]+1:]
-            else:
-                tag_dict[tag] = filename[indices[0]+1:indices[1]]
+            if index!=-1:
+                filename = path[index:].split('/')[0]
+                indices_object = re.finditer(pattern='_', string=filename)
+                indices = [index.start() for index in indices_object]
+                if len(indices) < 2 or tag=='cond':#condition description can contain multiple words separated by _
+                    tag_dict[tag] = filename[indices[0]+1:]
+                else:
+                    tag_dict[tag] = filename[indices[0]+1:indices[1]]
         return tag_dict
 
     def get_run_number(self, path):

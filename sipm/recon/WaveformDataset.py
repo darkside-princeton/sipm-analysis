@@ -14,7 +14,7 @@ class WaveformDataset:
             channels (list, optional): A list of channel numbers. Defaults to [0,1,2,3].
             samples (int, optional): Length of acquisition window. Defaults to 3000.
         """
-        self.datadir = "/scratch/gpfs/GALBIATI/data/sipm/reflector_studies/"
+        self.datadir = "/scratch/gpfs/GALBIATI/data/sipm/"
         self.path = f"{self.datadir}/{path.replace(self.datadir, '')}"
         self.channels = channels
         self.samples = samples
@@ -55,9 +55,10 @@ class WaveformDataset:
             new_channel = wfa.WaveformAnalyzer(id=i, pol=self.pol, path=self.path, samples=self.samples)
             channels.append(new_channel)
         # Get position and voltage
-        id_pos = [self.path.find('pos_')+4, self.path.find('_light')]
-        self.pos = self.path[id_pos[0]:id_pos[1]]
-        id_volt = [self.path.find('volt_')+5, self.path.find('_pos')]
+        if self.path.find('pos_')!=-1:
+            id_pos = [self.path.find('pos_')+4, self.path.find('_',self.path.find('pos_')+4)]
+            self.pos = self.path[id_pos[0]:id_pos[1]]
+        id_volt = [self.path.find('volt_')+5, self.path.find('_',self.path.find('volt_')+5)]
         self.volt = int(self.path[id_volt[0]:id_volt[1]])
         return np.array(channels)
 

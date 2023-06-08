@@ -24,7 +24,7 @@ class Scheduler():
         self.partition = "physics"
         self.nodes = 1 
         self.tasks_per_node = 1 
-        self.cpu_memory = 8 # in GB
+        self.cpu_memory = 16 # in GB
         self.wall_time = "4:00:00"
         self.output = "test3.log"
         self.conda_activate = "conda activate ds-pu"
