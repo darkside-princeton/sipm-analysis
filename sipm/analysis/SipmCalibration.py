@@ -4,6 +4,8 @@ import numpy as np
 import scipy
 from scipy.optimize import curve_fit
 import sipm.util.functions as func
+import os
+import csv
 
 class SipmCalibration(AdvancedAnalyzer):
     """The class for SiPM calibration analysis
@@ -51,6 +53,7 @@ class SipmCalibration(AdvancedAnalyzer):
             self.results['ap_charge'][pos] = {}
             self.results['ap_prob'][pos] = {}
             self.results['gain'][pos] = {}
+            self.results['vbd'][pos] = {}
             for ch in channels:
                 self.amp_hist[pos][ch] = {}
                 self.crosstalk[pos][ch] = {}
@@ -66,6 +69,7 @@ class SipmCalibration(AdvancedAnalyzer):
                 self.results['ap_charge'][pos][ch] = {}
                 self.results['ap_prob'][pos][ch] = {}
                 self.results['gain'][pos][ch] = {}
+                self.results['vbd'][pos][ch] = {}
                 for volt in voltages:
                     self.amp_hist[pos][ch][volt] = {}
                     self.crosstalk[pos][ch][volt] = {}
@@ -138,9 +142,9 @@ class SipmCalibration(AdvancedAnalyzer):
                     self.crosstalk[pos][ch][volt]['dict'] = self.crosstalk[pos][ch][volt]['par'][1]
                     self.crosstalk[pos][ch][volt]['dict_err'] = func.error_distance(df=2, sigma=1)*np.sqrt(self.crosstalk[pos][ch][volt]['cov'][1, 1])
                     print(f'{pos} ch{ch} {volt}V P_dict = {self.crosstalk[pos][ch][volt]["dict"]:.4f} +/- {self.crosstalk[pos][ch][volt]["dict_err"]:.4f}')
-                self.results['dict'][pos][ch]['x'] = self.voltages
-                self.results['dict'][pos][ch]['y'] = [self.crosstalk[pos][ch][volt]['dict'] for volt in self.voltages]
-                self.results['dict'][pos][ch]['yerr'] = [self.crosstalk[pos][ch][volt]['dict_err'] for volt in self.voltages]
+                self.results['dict'][pos][ch]['bias'] = self.voltages
+                self.results['dict'][pos][ch]['dict'] = [self.crosstalk[pos][ch][volt]['dict'] for volt in self.voltages]
+                self.results['dict'][pos][ch]['dict_err'] = [self.crosstalk[pos][ch][volt]['dict_err'] for volt in self.voltages]
 
     def charge_analysis(self,nbins=1000, hist_range=(-2e3, 6e3), fit_range_thre = (0.02, 0.3)):
         for pos in self.positions:
@@ -221,9 +225,9 @@ class SipmCalibration(AdvancedAnalyzer):
                         maxfev=10000)
                     self.gain_avg_fits[pos][ch][volt]['Qavg'] = self.gain_avg_fits[pos][ch][volt]['par'][0]
                     self.gain_avg_fits[pos][ch][volt]['Qavg_err'] = func.error_distance(df=2, sigma=1)*np.sqrt(self.gain_avg_fits[pos][ch][volt]['cov'][0, 0])
-                self.results['gain'][pos][ch]['x'] = self.voltages
-                self.results['gain'][pos][ch]['y'] = [self.gain_peak_fits[pos][ch][volt]['Qpeak'] for volt in self.voltages]
-                self.results['gain'][pos][ch]['yerr'] = [self.gain_peak_fits[pos][ch][volt]['Qpeak_err'] for volt in self.voltages]
+                self.results['gain'][pos][ch]['bias'] = self.voltages
+                self.results['gain'][pos][ch]['gain'] = [self.gain_peak_fits[pos][ch][volt]['Qpeak'] for volt in self.voltages]
+                self.results['gain'][pos][ch]['gain_err'] = [self.gain_peak_fits[pos][ch][volt]['Qpeak_err'] for volt in self.voltages]
     
     def afterpulse_analysis(self):
         for pos in self.positions:
@@ -248,14 +252,61 @@ class SipmCalibration(AdvancedAnalyzer):
                     self.ap_prob_fits[pos][ch][volt]['Pap'] = 1-self.ap_prob_fits[pos][ch][volt]['par'][0]
                     self.ap_prob_fits[pos][ch][volt]['Pap_err'] = func.error_distance(df=1, sigma=1)*np.sqrt(self.ap_prob_fits[pos][ch][volt]['cov'][0, 0])
                 # Qap-Vbias
-                self.results['ap_charge'][pos][ch]['x'] = self.voltages
-                self.results['ap_charge'][pos][ch]['y'] = [self.ap_charge[pos][ch][volt]['Qap'] for volt in self.voltages]
-                self.results['ap_charge'][pos][ch]['yerr'] = [self.ap_charge[pos][ch][volt]['Qap_err'] for volt in self.voltages]
+                self.results['ap_charge'][pos][ch]['bias'] = self.voltages
+                self.results['ap_charge'][pos][ch]['ap_charge'] = [self.ap_charge[pos][ch][volt]['Qap'] for volt in self.voltages]
+                self.results['ap_charge'][pos][ch]['ap_charge_err'] = [self.ap_charge[pos][ch][volt]['Qap_err'] for volt in self.voltages]
                 # Pap-Vbias
-                self.results['ap_prob'][pos][ch]['x'] = self.voltages
-                self.results['ap_prob'][pos][ch]['y'] = [self.ap_prob_fits[pos][ch][volt]['Pap'] for volt in self.voltages]
-                self.results['ap_prob'][pos][ch]['yerr'] = [self.ap_prob_fits[pos][ch][volt]['Pap_err'] for volt in self.voltages]
+                self.results['ap_prob'][pos][ch]['bias'] = self.voltages
+                self.results['ap_prob'][pos][ch]['ap_prob'] = [self.ap_prob_fits[pos][ch][volt]['Pap'] for volt in self.voltages]
+                self.results['ap_prob'][pos][ch]['ap_prob_err'] = [self.ap_prob_fits[pos][ch][volt]['Pap_err'] for volt in self.voltages]
     
-    def breakdown_analysis(self):
-        pass            
-        
+    def breakdown_analysis(self, init_pars=[100,55]):
+        # Fitting for breakdown voltage
+        for pos in self.positions:
+            for ch in self.channels:
+                self.vbd_fits[pos][ch]['x'] = self.voltages
+                self.vbd_fits[pos][ch]['y'] = [self.gain_peak_fits[pos][ch][volt]['Qpeak'] for volt in self.voltages]
+                self.vbd_fits[pos][ch]['yerr'] = [self.gain_peak_fits[pos][ch][volt]['Qpeak_err'] for volt in self.voltages]
+                self.vbd_fits[pos][ch]['par'], self.vbd_fits[pos][ch]['cov'] = curve_fit(
+                    func.line,
+                    self.vbd_fits[pos][ch]['x'],
+                    self.vbd_fits[pos][ch]['y'],
+                    sigma=self.vbd_fits[pos][ch]['yerr'],
+                    p0=init_pars,
+                    maxfev=10000)
+                self.vbd_fits[pos][ch]['vbd'] = self.vbd_fits[pos][ch]['par'][1]
+                self.vbd_fits[pos][ch]['vbd_err'] = func.error_distance(df=2, sigma=1)*np.sqrt(self.vbd_fits[pos][ch]['cov'][1, 1])
+                print(f'{pos} ch{ch} Vbd = {self.vbd_fits[pos][ch]["vbd"]:.2f} +/- {self.vbd_fits[pos][ch]["vbd_err"]:.2f} V')
+                self.results['vbd'][pos][ch]['vbd_sipm'] = self.vbd_fits[pos][ch]['vbd']/2
+                self.results['vbd'][pos][ch]['vbd_sipm_err'] = self.vbd_fits[pos][ch]['vbd_err']/2
+                self.results['dict'][pos][ch]['ov'] = np.array(self.results['dict'][pos][ch]['bias'])/2-self.results['vbd'][pos][ch]['vbd_sipm']
+                self.results['dict'][pos][ch]['ov_err'] = np.ones(self.results['dict'][pos][ch]['ov'].shape[0])*self.results['vbd'][pos][ch]['vbd_sipm_err']
+                self.results['ap_charge'][pos][ch]['ov'] = np.array(self.results['ap_charge'][pos][ch]['bias'])/2-self.results['vbd'][pos][ch]['vbd_sipm']
+                self.results['ap_charge'][pos][ch]['ov_err'] = np.ones(self.results['ap_charge'][pos][ch]['ov'].shape[0])*self.results['vbd'][pos][ch]['vbd_sipm_err']
+                self.results['ap_prob'][pos][ch]['ov'] = np.array(self.results['ap_prob'][pos][ch]['bias'])/2-self.results['vbd'][pos][ch]['vbd_sipm']
+                self.results['ap_prob'][pos][ch]['ov_err'] = np.ones(self.results['ap_prob'][pos][ch]['ov'].shape[0])*self.results['vbd'][pos][ch]['vbd_sipm_err']
+                self.results['gain'][pos][ch]['ov'] = np.array(self.results['gain'][pos][ch]['bias'])/2-self.results['vbd'][pos][ch]['vbd_sipm']
+                self.results['gain'][pos][ch]['ov_err'] = np.ones(self.results['gain'][pos][ch]['ov'].shape[0])*self.results['vbd'][pos][ch]['vbd_sipm_err']
+                
+    def write_to_csv(self, name):
+        if not os.path.exists(f'data/{name}'):
+            os.makedirs(f'data/{name}')
+        for volt in self.voltages:
+            with open(f'data/{name}/{name}_{volt}V.csv', 'w') as f:
+                w = csv.writer(f)
+                w.writerow(['CH', 'A1min', 'A1max', 'p', 'p_err', 'Qavg', 'Qavg_err', 'Qpeak', 'Qpeak_err', 'Qap', 'Qap_err', 'bsl_rms'])
+                for pos in self.positions:
+                    for ch in self.channels:
+                        row = [f'{pos[0].upper()}{ch}']
+                        row += [str(self.amp_hist[pos][ch][volt]['boundaries'][1]),
+                                str(self.amp_hist[pos][ch][volt]['boundaries'][2])]
+                        row += [str(self.crosstalk[pos][ch][volt]['dict']),
+                                str(self.crosstalk[pos][ch][volt]['dict_err'])]
+                        row += [str(self.gain_avg_fits[pos][ch][volt]['Qavg']),
+                                str(self.gain_avg_fits[pos][ch][volt]['Qavg_err'])]
+                        row += [str(self.gain_peak_fits[pos][ch][volt]['Qpeak']),
+                                str(self.gain_peak_fits[pos][ch][volt]['Qpeak_err'])]
+                        row += [str(self.ap_charge[pos][ch][volt]['Qap']),
+                                str(self.ap_charge[pos][ch][volt]['Qap_err'])]
+                        row += [str(self.bsl_rms_thre[pos][ch][volt])]
+                        w.writerow(row)
