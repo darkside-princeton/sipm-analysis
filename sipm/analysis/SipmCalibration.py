@@ -147,6 +147,13 @@ class SipmCalibration(AdvancedAnalyzer):
                 self.results['dict'][pos][ch]['dict_err'] = [self.crosstalk[pos][ch][volt]['dict_err'] for volt in self.voltages]
 
     def charge_analysis(self,nbins=1000, hist_range=(-2e3, 6e3), fit_range_thre = (0.02, 0.3)):
+        """Analyze charge histograms. Fit each PE peak in the histograms with a Gaussian to determine the SPE gain, the afterpulse charge, and the afterpulse probability.
+
+        Args:
+            nbins (int, optional): Number of bins in each histogram. Defaults to 1000.
+            hist_range (tuple, optional): Range (min,max) of the histogram at 63V. At different voltages, max=max(63V)+(volt-63)*1e3. Defaults to (-2e3, 6e3).
+            fit_range_thre (tuple, optional): The threshold heights (fraction of the maximum height for each PE peak) in the histograms for the Gaussian fit to each PE peak. Defaults to (0.02, 0.3).
+        """
         for pos in self.positions:
             for ch in self.channels:
                 for volt in self.voltages:
@@ -196,6 +203,8 @@ class SipmCalibration(AdvancedAnalyzer):
                         self.ap_prob[pos][ch][volt][pe]['prob_err'] = np.sqrt(self.ap_prob[pos][ch][volt][pe]['prob']*(1-self.ap_prob[pos][ch][volt][pe]['prob'])/len(selected_charges))
 
     def gain_analysis(self):
+        """Fit the positions of the PE peaks in the charge histogram with a straight line to obtain the SPE gain.
+        """
         for pos in self.positions:
             for ch in self.channels:
                 for volt in self.voltages:
@@ -230,6 +239,8 @@ class SipmCalibration(AdvancedAnalyzer):
                 self.results['gain'][pos][ch]['gain_err'] = [self.gain_peak_fits[pos][ch][volt]['Qpeak_err'] for volt in self.voltages]
     
     def afterpulse_analysis(self):
+        """Calculate afterpulse charge and afterpulse probability. See calibration notebooks for more details.
+        """
         for pos in self.positions:
             for ch in self.channels:
                 for volt in self.voltages:
@@ -260,7 +271,13 @@ class SipmCalibration(AdvancedAnalyzer):
                 self.results['ap_prob'][pos][ch]['ap_prob'] = [self.ap_prob_fits[pos][ch][volt]['Pap'] for volt in self.voltages]
                 self.results['ap_prob'][pos][ch]['ap_prob_err'] = [self.ap_prob_fits[pos][ch][volt]['Pap_err'] for volt in self.voltages]
     
-    def breakdown_analysis(self, init_pars=[100,55]):
+    def breakdown_analysis(self, nsipms:int, init_pars=[100,55]):
+        """Fit SPE gain vs bias voltage to obtain the breakdown voltage.
+
+        Args:
+            nsipms (int): The number of sipms in series.
+            init_pars (list, optional): Initial parameters [slope, breakdown voltage]. Defaults to [100,55].
+        """
         # Fitting for breakdown voltage
         for pos in self.positions:
             for ch in self.channels:
@@ -277,18 +294,23 @@ class SipmCalibration(AdvancedAnalyzer):
                 self.vbd_fits[pos][ch]['vbd'] = self.vbd_fits[pos][ch]['par'][1]
                 self.vbd_fits[pos][ch]['vbd_err'] = func.error_distance(df=2, sigma=1)*np.sqrt(self.vbd_fits[pos][ch]['cov'][1, 1])
                 print(f'{pos} ch{ch} Vbd = {self.vbd_fits[pos][ch]["vbd"]:.2f} +/- {self.vbd_fits[pos][ch]["vbd_err"]:.2f} V')
-                self.results['vbd'][pos][ch]['vbd_sipm'] = self.vbd_fits[pos][ch]['vbd']/2
-                self.results['vbd'][pos][ch]['vbd_sipm_err'] = self.vbd_fits[pos][ch]['vbd_err']/2
-                self.results['dict'][pos][ch]['ov'] = np.array(self.results['dict'][pos][ch]['bias'])/2-self.results['vbd'][pos][ch]['vbd_sipm']
+                self.results['vbd'][pos][ch]['vbd_sipm'] = self.vbd_fits[pos][ch]['vbd']/nsipms
+                self.results['vbd'][pos][ch]['vbd_sipm_err'] = self.vbd_fits[pos][ch]['vbd_err']/nsipms
+                self.results['dict'][pos][ch]['ov'] = np.array(self.results['dict'][pos][ch]['bias'])/nsipms-self.results['vbd'][pos][ch]['vbd_sipm']
                 self.results['dict'][pos][ch]['ov_err'] = np.ones(self.results['dict'][pos][ch]['ov'].shape[0])*self.results['vbd'][pos][ch]['vbd_sipm_err']
-                self.results['ap_charge'][pos][ch]['ov'] = np.array(self.results['ap_charge'][pos][ch]['bias'])/2-self.results['vbd'][pos][ch]['vbd_sipm']
+                self.results['ap_charge'][pos][ch]['ov'] = np.array(self.results['ap_charge'][pos][ch]['bias'])/nsipms-self.results['vbd'][pos][ch]['vbd_sipm']
                 self.results['ap_charge'][pos][ch]['ov_err'] = np.ones(self.results['ap_charge'][pos][ch]['ov'].shape[0])*self.results['vbd'][pos][ch]['vbd_sipm_err']
-                self.results['ap_prob'][pos][ch]['ov'] = np.array(self.results['ap_prob'][pos][ch]['bias'])/2-self.results['vbd'][pos][ch]['vbd_sipm']
+                self.results['ap_prob'][pos][ch]['ov'] = np.array(self.results['ap_prob'][pos][ch]['bias'])/nsipms-self.results['vbd'][pos][ch]['vbd_sipm']
                 self.results['ap_prob'][pos][ch]['ov_err'] = np.ones(self.results['ap_prob'][pos][ch]['ov'].shape[0])*self.results['vbd'][pos][ch]['vbd_sipm_err']
-                self.results['gain'][pos][ch]['ov'] = np.array(self.results['gain'][pos][ch]['bias'])/2-self.results['vbd'][pos][ch]['vbd_sipm']
+                self.results['gain'][pos][ch]['ov'] = np.array(self.results['gain'][pos][ch]['bias'])/nsipms-self.results['vbd'][pos][ch]['vbd_sipm']
                 self.results['gain'][pos][ch]['ov_err'] = np.ones(self.results['gain'][pos][ch]['ov'].shape[0])*self.results['vbd'][pos][ch]['vbd_sipm_err']
                 
-    def write_to_csv(self, name):
+    def write_to_csv(self, name:str):
+        """Write calibration results to csv files.
+
+        Args:
+            name (str): Folder will be 'data/{name}' and files will be '{name}_{volt}V.csv'
+        """
         if not os.path.exists(f'data/{name}'):
             os.makedirs(f'data/{name}')
         for volt in self.voltages:
