@@ -37,7 +37,7 @@ class SipmCalibration(AdvancedAnalyzer):
         self.ap_prob = {} # afterpulsing probability
         self.ap_prob_fits = {} # fits for ap probability
         self.vbd_fits = {} # fits for breakdown voltage
-        self.results = {'vbd': {}, 'dict': {}, 'ap_charge': {}, 'ap_prob': {}, 'gain': {}}
+        self.results = {'vbd': {}, 'dict': {}, 'ap_charge': {}, 'ap_prob': {}, 'gain': {}, 'renf':{}}
         for pos in self.positions:
             self.amp_hist[pos] = {}
             self.crosstalk[pos] = {}
@@ -54,6 +54,7 @@ class SipmCalibration(AdvancedAnalyzer):
             self.results['ap_prob'][pos] = {}
             self.results['gain'][pos] = {}
             self.results['vbd'][pos] = {}
+            self.results['renf'][pos] = {}
             for ch in channels:
                 self.amp_hist[pos][ch] = {}
                 self.crosstalk[pos][ch] = {}
@@ -70,6 +71,7 @@ class SipmCalibration(AdvancedAnalyzer):
                 self.results['ap_prob'][pos][ch] = {}
                 self.results['gain'][pos][ch] = {}
                 self.results['vbd'][pos][ch] = {}
+                self.results['renf'][pos][ch] = {}
                 for volt in voltages:
                     self.amp_hist[pos][ch][volt] = {}
                     self.crosstalk[pos][ch][volt] = {}
@@ -279,6 +281,7 @@ class SipmCalibration(AdvancedAnalyzer):
             init_pars (list, optional): Initial parameters [slope, breakdown voltage]. Defaults to [100,55].
         """
         # Fitting for breakdown voltage
+        self.nsipms = nsipms
         for pos in self.positions:
             for ch in self.channels:
                 self.vbd_fits[pos][ch]['x'] = self.voltages
@@ -332,3 +335,14 @@ class SipmCalibration(AdvancedAnalyzer):
                                 str(self.ap_charge[pos][ch][volt]['Qap_err'])]
                         row += [str(self.bsl_rms_thre[pos][ch][volt])]
                         w.writerow(row)
+                        
+    def calculate_renf(self):
+        """Calculate reduced ENF. See calibration notebooks for more details.
+        """
+        for pos in self.positions:
+            for ch in self.channels:
+                self.results['renf'][pos][ch]['bias'] = np.array(self.voltages)
+                self.results['renf'][pos][ch]['ov'] = self.results['renf'][pos][ch]['bias']/self.nsipms-self.results['vbd'][pos][ch]['vbd_sipm']
+                self.results['renf'][pos][ch]['ov_err'] = np.ones(self.results['renf'][pos][ch]['ov'].shape[0])*self.results['vbd'][pos][ch]['vbd_sipm_err']
+                self.results['renf'][pos][ch]['renf'] = np.array([(1+self.crosstalk[pos][ch][volt]['par'][1])/(self.crosstalk[pos][ch][volt]['par'][0]/self.crosstalk[pos][ch][self.voltages[0]]['par'][0]) for volt in self.voltages])
+                self.results['renf'][pos][ch]['renf_err'] = self.results['renf'][pos][ch]['renf']*np.array([ ( self.crosstalk[pos][ch][volt]['cov'][0,0]/(self.crosstalk[pos][ch][volt]['par'][0])**2 + self.crosstalk[pos][ch][volt]['cov'][1,1]/(1+self.crosstalk[pos][ch][volt]['par'][1])**2 )**0.5 for volt in self.voltages])
