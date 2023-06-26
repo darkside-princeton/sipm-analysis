@@ -14,7 +14,7 @@ class AdvancedAnalyzer:
             directory (str): Directory containing processed HDF5 files (e.g. '/scratch/gpfs/as111/results/')
             metadata_dict (Dict): Metadata arranged into a nested dictionary. Need to match the file names. (See jupyter/calibration_liq2.ipynb for example)
             wf (bool): Whether the file names have a trailing "_wf". True for the files processed with sipm/exe/laser_waveform.py and simp/exe/scintillation_waveform.py. False for the files processed with sipm/exe/laser_pulse.py and sipm/exe/scintillation_pulse.py
-            merge (bool): Whether to merge different different runs.
+            merge (bool): Whether to merge different runs.
             verbose (bool): Whether to print more information.
         """
         self.directory = directory
@@ -27,6 +27,8 @@ class AdvancedAnalyzer:
         self.baseline = {}
 
     def print_info(self):
+        """Print nested structure of self.data with every lowest-level entry replaced by '###'.
+        """
         print('\nData structure:')
         print(yaml.dump(self.proto_data,default_flow_style=False))
 
@@ -82,7 +84,14 @@ class AdvancedAnalyzer:
         if self.verbose:
             self.print_info()
 
-    def metadata_dfs(self, mydict, mydata, myproto):
+    def metadata_dfs(self, mydict:Dict, mydata:Dict, myproto:Dict):
+        """Loop over and load all files recursively.
+
+        Args:
+            mydict (Dict): metadata dictionary
+            mydata (Dict): data dictionary
+            myproto (Dict): proto-data dictionary (same structure as data but with data content replaced by '###')
+        """
         if 'metadata' not in mydict:
             for k,v in mydict.items():
                 mydata[k] = {}
@@ -104,7 +113,14 @@ class AdvancedAnalyzer:
         self.bsl_rms_thre = threshold_dict
         self.baseline_cut_dfs(threshold_dict, self.data, self.baseline)
     
-    def baseline_cut_dfs(self, mythre, mydata, mybsl):
+    def baseline_cut_dfs(self, mythre:Dict, mydata:Dict, mybsl:Dict):
+        """Loop over all data entry and apply baseline rms cut.
+
+        Args:
+            mythre (Dict): Baseline rms thresholds arranged into a nested dictionary with the same structure as self.metadata.
+            mydata (Dict): Data dictionary
+            mybsl (Dict): Baseline dictionary. Contains baseline rms and baseline mean distributions as well as cut fractions.
+        """
         if 'data' not in mydata:
             for k,v in mydata.items():
                 mybsl[k] = {}
