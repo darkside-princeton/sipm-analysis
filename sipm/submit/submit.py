@@ -25,6 +25,8 @@ elif conf['script'] == 'sipm/exe/scintillation_pulse.py':
     scheduler.submit(script=conf['script'],args=f"-n {conf['num_events']} -s {conf['calibration']}")
 elif conf['script'] == 'sipm/exe/laser_waveform.py':
     scheduler.submit(script=conf['script'],args=f"-n {conf['num_events']} -s {conf['calibration']}")
+elif conf['script'] == 'sipm/exe/laser_waveform_liq4.py':
+    scheduler.submit(script=conf['script'],args=f"-n {conf['num_events']} -s {conf['calibration']}")
 elif conf['script'] == 'sipm/exe/scintillation_waveform.py':
     if 'cpu_memory' in conf:
         scheduler.cpu_memory=conf['cpu_memory']
