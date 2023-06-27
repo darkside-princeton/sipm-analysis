@@ -27,7 +27,7 @@ class Scheduler():
         self.cpu_memory = 16 # in GB
         self.wall_time = "4:00:00"
         self.output = "test3.log"
-        self.conda_activate = "conda activate ds-pu"
+        self.conda_activate = "conda activate sipm"
 
     def check_dir(self):
         """ Check if current directory is the main directory of the sipm-analysis repository. If not, then change directory. 
@@ -70,6 +70,6 @@ class Scheduler():
             f.write(f"#SBATCH --time {self.wall_time}\n")
             f.write(f"#SBATCH --job-name job_{index}\n")
             f.write(f"#SBATCH --output {self.scratch}/log_{index}.log\n\n")
-            f.write(f"conda activate ds-pu\n\n")
+            f.write(f"conda activate sipm\n\n")
             f.write(f"pwd\n\n")
             f.write(f"python {script} -f {directory} {args}\n")

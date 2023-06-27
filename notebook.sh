@@ -18,6 +18,6 @@ user=$(whoami)
 cluster=$(hostname -f | awk -F"." '{print $2}')
 
 # load modules or conda environments here
-conda activate ds-pu
+conda activate sipm
 
 jupyter-notebook --no-browser --port=8888 --ip=${node}

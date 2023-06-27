@@ -13,10 +13,10 @@ python sipm/submit/submit.py -c sipm/config/analysis.yaml
 | Config. File | Description | Higher-level analysis | Pre-processing |
 | ------------ | ----------- | --------------------- | -------------- |
 | sipm/config/analysis.yaml | A minimal example | jupyter/io.ipynb | sipm/exe/analysis.py |
-| sipm/config/laser_pulse_a59_11_2022.yaml | Laser calibration | jupyter/calibration.ipynb | sipm/exe/laser_pulse.py |
-| sipm/config/laser_waveform_a59_11_2022.yaml | SiPM single PE pulse shape | jupyter/triplet_lifetime.ipynb | sipm/exe/laser_waveform.py |
-| sipm/config/scintillation_pulse_a59_11_2022.yaml | Scintillation light from Cs-137 gammas | jupyter/spectrum.ipynb | sipm/exe/scintillation_pulse.py |
-| sipm/config/scintillation_waveform*.yaml | LAr scintillation pulse shape | jupyter/triplet_lifetime.ipynb | sipm/exe/scintillation_waveform.py |
+| sipm/config/laser_pulse_*.yaml | Laser calibration | jupyter/calibration.ipynb | sipm/exe/laser_pulse.py |
+| sipm/config/laser_waveform_*.yaml | SiPM single PE pulse shape | jupyter/triplet_lifetime.ipynb | sipm/exe/laser_waveform.py |
+| sipm/config/scintillation_pulse_*.yaml | Scintillation light from Cs-137 gammas | jupyter/spectrum.ipynb | sipm/exe/scintillation_pulse.py |
+| sipm/config/scintillation_waveform_*.yaml | LAr scintillation pulse shape | jupyter/triplet_lifetime.ipynb | sipm/exe/scintillation_waveform.py |
 
 Each script will produce HDF5 files under ``/scratch/gpfs/your-netid/results/`` containing the processed data, including amplitude, charge, baseline rms, etc.
 
