@@ -19,7 +19,7 @@ class WaveformDataset:
         self.channels = channels
         self.samples = samples
         self.pol = pol
-        self.pos = ''
+        self.pos = 'top'
         self.volt = 0
         self.output = {}
         self.read_timestamp()
