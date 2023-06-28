@@ -124,7 +124,8 @@ class WaveformAnalyzer():
         arwfs = []
         for ev_ in ev:
             wfs.append(self.traces[ev_,:])
-            arwfs.append(self.ar_filtered_traces[ev_,:])
+            if ar_filter:
+                arwfs.append(self.ar_filtered_traces[ev_,:])
         self.clear()
         return wfs, arwfs
 
