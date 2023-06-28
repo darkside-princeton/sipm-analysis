@@ -24,7 +24,8 @@ def main():
         d.ch[i].get_max(ar=True, trig=True) # AR matched filter, maximum near trigger position
         d.ch[i].get_integral() # full integral (from trigger-10 samples to end)
         # Make cut on filtered amplitude->SPE, baseline rms->pre-trigger pulses, and total integral->post-trigger scintillation pulses
-        cut = (np.array(d.ch[i].output['amplitude_trig'])<d.a1max[i]) & \
+        cut = (np.array(d.ch[i].output['baseline_rms'])<d.bslrms[i]) & \
+            (np.array(d.ch[i].output['amplitude_trig'])<d.a1max[i]) & \
             (np.array(d.ch[i].output['amplitude_trig'])>d.a1min[i])
         # Store SPE average waveform and number of selected waveforms
         d.ch[i].output['n_spe_wfs'] = np.sum(cut)
