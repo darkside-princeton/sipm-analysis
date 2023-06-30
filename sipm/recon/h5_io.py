@@ -80,7 +80,7 @@ class IO():
             return '0'
         
 
-    def set_h5_filename(self,wf=False):
+    def set_h5_filename(self,script=None):
         self.metadata = self.get_metadata(self.filename)
         self.run_number = self.get_run_number(self.filename)
         print("run number is: ", self.run_number)
@@ -88,12 +88,10 @@ class IO():
         tag = ""
         for x,y in self.metadata.items():
             tag += f"_{x}_{y}"
-        if wf:
-            self.h5_filename = f"{self.scratch}/{self.date}{tag}_run{self.run_number}_wf.h5"
-        else:
-            self.h5_filename = f"{self.scratch}/{self.date}{tag}_run{self.run_number}.h5"
+        if script!=None:
+            self.h5_filename = f"{self.scratch}/{self.date}{tag}_run{self.run_number}_{script}.h5"
     
-    def save(self, wf=False):
+    def save(self, script=None):
         """Saving the relevant parameters to a HDF5 file for further analysis. 
         Parameters
         ----------
@@ -113,7 +111,7 @@ class IO():
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
             print('df=',df)
 
-            self.set_h5_filename(wf)
+            self.set_h5_filename(script)
             
             store = pd.HDFStore(self.h5_filename)
             store.put(f"{self.metadata['volt']}/{i}", df, format='t', append=False, data_columns=True)
@@ -128,7 +126,7 @@ class IO():
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
             print('df=',df)
 
-            self.set_h5_filename(wf)
+            self.set_h5_filename(script)
 
             store = pd.HDFStore(self.h5_filename)
             store.put(f"{self.metadata['volt']}/-1", df, format='t', append=False, data_columns=True)
