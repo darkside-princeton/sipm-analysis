@@ -1,5 +1,5 @@
 files:
-- /scratch/gpfs/GALBIATI/data/sipm/hamamatsu_test/2023-06-07/*volt_90*/
+- /scratch/gpfs/GALBIATI/data/sipm/hamamatsu_test/2023-06-07/*volt_60*/
 num_events: 100000
 calibration: /home/nwoofter/sipm-analysis/data/calibration_liq4/
 script: sipm/exe/laser_waveform_liq4.py
