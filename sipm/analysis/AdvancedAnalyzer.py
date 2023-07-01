@@ -7,13 +7,13 @@ import numpy as np
 class AdvancedAnalyzer:
     """The parent class for the post-analysis classes.
     """
-    def __init__(self, directory:str, metadata_dict:Dict, wf:bool, merge:bool, verbose:bool):
+    def __init__(self, directory:str, metadata_dict:Dict, script:str, merge:bool, verbose:bool):
         """AdvancedAnalyzer constructor.
 
         Args:
             directory (str): Directory containing processed HDF5 files (e.g. '/scratch/gpfs/as111/results/')
             metadata_dict (Dict): Metadata arranged into a nested dictionary. Need to match the file names. (See jupyter/calibration_liq2.ipynb for example)
-            wf (bool): Whether the file names have a trailing "_wf". True for the files processed with sipm/exe/laser_waveform.py and simp/exe/scintillation_waveform.py. False for the files processed with sipm/exe/laser_pulse.py and sipm/exe/scintillation_pulse.py
+            script (str): The name of the pre-processing script (without .py)
             merge (bool): Whether to merge different runs.
             verbose (bool): Whether to print more information.
         """
@@ -21,7 +21,7 @@ class AdvancedAnalyzer:
         self.metadata = metadata_dict
         self.data = {}
         self.proto_data = {}
-        self.wf = wf
+        self.script = script
         self.merge = merge
         self.verbose = verbose
         self.baseline = {}
@@ -49,16 +49,10 @@ class AdvancedAnalyzer:
             pandas.DataFrame: data
         """
         data = []
-        if self.wf:
-            files = glob.glob(f"{self.directory}{date}/{date}_volt_{volt}_pos_{pos}_light_{light}_coinc_{coinc}_cond_{cond}_run{run}_wf.h5")
-        else:
-            files = glob.glob(f"{self.directory}{date}/{date}_volt_{volt}_pos_{pos}_light_{light}_coinc_{coinc}_cond_{cond}_run{run}[!_wf].h5")
+        files = glob.glob(f"{self.directory}{date}/{date}_volt_{volt}_pos_{pos}_light_{light}_coinc_{coinc}_cond_{cond}_run{run}_{self.script}.h5")
         for f in files:
             ind = f.find('run')+3
-            if self.wf:
-                run_number = int(f[ind:f.find('_',ind)])
-            else:
-                run_number = int(f[ind:f.find('.',ind)])
+            run_number = int(f[ind:f.find('_',ind)])
             df = pd.read_hdf(f, key=f'{volt}/{ch}')
             df['event'] = df.index
             df['run'] = np.array([run_number]*df.shape[0])
@@ -71,10 +65,7 @@ class AdvancedAnalyzer:
             else:
                 keys = data.keys()
                 events = len(data[keys[0]])
-            if self.wf:
-                print(f'{date} {volt}V {pos} {light} coinc={coinc} cond={cond} run{run} ch{ch} wf - {len(files)} files {events} events')
-            else:
-                print(f'{date} {volt}V {pos} {light} coinc={coinc} cond={cond} run{run} ch{ch} - {len(files)} files {events} events')
+            print(f'{date} {volt}V {pos} {light} coinc={coinc} cond={cond} run{run} ch{ch} script={self.script}.py - {len(files)} files {events} events')
         return data
 
     def load_files(self):
