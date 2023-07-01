@@ -80,7 +80,7 @@ class IO():
             return '0'
         
 
-    def set_h5_filename(self,script=None):
+    def set_h5_filename(self,script):
         self.metadata = self.get_metadata(self.filename)
         self.run_number = self.get_run_number(self.filename)
         print("run number is: ", self.run_number)
@@ -88,10 +88,9 @@ class IO():
         tag = ""
         for x,y in self.metadata.items():
             tag += f"_{x}_{y}"
-        if script!=None:
-            self.h5_filename = f"{self.scratch}/{self.date}{tag}_run{self.run_number}_{script}.h5"
+        self.h5_filename = f"{self.scratch}/{self.date}{tag}_run{self.run_number}_{script}.h5"
     
-    def save(self, script=None):
+    def save(self, script):
         """Saving the relevant parameters to a HDF5 file for further analysis. 
         Parameters
         ----------
@@ -102,7 +101,7 @@ class IO():
 
         if not os.path.isdir(self.scratch):
             os.makedirs(f"{self.scratch}")
-
+        self.set_h5_filename(script)
         # data output for individual channels
         for i in self.d.channels:
             data = self.d.ch[i].output
@@ -111,8 +110,6 @@ class IO():
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
             print('df=',df)
 
-            self.set_h5_filename(script)
-            
             store = pd.HDFStore(self.h5_filename)
             store.put(f"{self.metadata['volt']}/{i}", df, format='t', append=False, data_columns=True)
             store.get_storer(f"{self.metadata['volt']}/{i}").attrs.metadata = self.metadata
@@ -125,8 +122,6 @@ class IO():
             
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
             print('df=',df)
-
-            self.set_h5_filename(script)
 
             store = pd.HDFStore(self.h5_filename)
             store.put(f"{self.metadata['volt']}/-1", df, format='t', append=False, data_columns=True)
