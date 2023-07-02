@@ -5,4 +5,4 @@ script: sipm/exe/laser_waveform.py
 description: Pre-processing laser calibration data (single photo-electron pulse shape) taken in April-May 2023 for Tyvek I59 measurements (Liquefaction 3)
 arguments:
   num_events: 100000
-  sipm_calib_dir: /home/as111/sipm-analysis/data/calibration_liq3/
+  calib_file: /home/as111/sipm-analysis/data/calibration_liq3.h5
