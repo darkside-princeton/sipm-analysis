@@ -168,7 +168,7 @@ class WaveformDataset:
             num_events (int, optional): Number of events. Defaults to 1e9.
             calib (str, optional): Directory that contains SiPM calibration results. Defaults to "".
         """
-        self.read_calibration(calib)
+        self.read_calibration_h5(calib)
         for i in self.channels:
             self.ch[i].read_data(header=header, num_events=num_events)
             self.ch[i].baseline_subtraction(samples=self.ch[i].trigger_position-int(0.5/self.ch[i].sample_step))
@@ -176,10 +176,10 @@ class WaveformDataset:
             self.ch[i].get_max(ar=True, trig=True) # AR matched filter, maximum near trigger position
             self.ch[i].get_integral() # full integral (from trigger-10 samples to end)
             # Make cut on filtered amplitude->SPE, baseline rms->pre-trigger pulses, and total integral->post-trigger scintillation pulses
-            cut = (np.array(self.ch[i].output['baseline_rms'])<self.bslrms[i]) & \
-                (np.array(self.ch[i].output['amplitude_trig'])<self.a1max[i]) & \
-                (np.array(self.ch[i].output['amplitude_trig'])>self.a1min[i]) & \
-                (np.array(self.ch[i].output['integral'])<6*self.gain[i])
+            cut = (np.array(self.ch[i].output['baseline_rms'])<self.calib_df['bsl_rms'][i]) & \
+                (np.array(self.ch[i].output['amplitude_trig'])<self.calib_df['A1max'][i]) & \
+                (np.array(self.ch[i].output['amplitude_trig'])>self.calib_df['A1min'][i]) & \
+                (np.array(self.ch[i].output['integral'])<6*self.calib_df['cn_corrected_gain'][i])
             # Store SPE average waveform and number of selected waveforms
             self.ch[i].output['n_spe_wfs'] = np.sum(cut)
             self.ch[i].output['avg_spe_wf'] = np.dot(self.ch[i].traces.T,cut)/self.ch[i].output['n_spe_wfs']
