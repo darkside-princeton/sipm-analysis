@@ -1,7 +1,8 @@
 files:
 - /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2023-04-27/*pos_bottom*/*/
 - /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2023-04-28/*pos_top*/*/
-num_events: 100000
-calibration: /home/as111/sipm-analysis/data/calibration_liq3/
 script: sipm/exe/laser_waveform.py
 description: Pre-processing laser calibration data (single photo-electron pulse shape) taken in April-May 2023 for Tyvek I59 measurements (Liquefaction 3)
+arguments:
+  num_events: 100000
+  calib_file: /home/as111/sipm-analysis/data/calibration_liq3.h5

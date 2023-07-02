@@ -1,14 +1,15 @@
 files:
 - /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/*/*pos_bottom*cond_gamma*/*/
 - /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/*/*pos_bottom*cond_with_gamma*/*/
-num_events: 100000
-calibration: /home/as111/sipm-analysis/data/calibration_liq2/
-fprompt_range:
-- 0.1
-- 0.5
-pe_range:
-- 100
-- 1000
 cpu_memory: 16
 script: sipm/exe/scintillation_waveform.py
 description: Pre-processing scintillation data (triplet lifetime evolution, bottom tile) taken in November 2022 for Tyvek A59 measurements (Liquefaction 2)
+arguments:
+  num_events: 100000
+  calib_file: /home/as111/sipm-analysis/data/calibration_liq2.h5
+  fprompt:
+  - 0.1
+  - 0.5
+  pe:
+  - 100
+  - 1000

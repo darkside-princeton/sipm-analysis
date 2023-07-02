@@ -6,11 +6,12 @@ from scipy.optimize import curve_fit
 import sipm.util.functions as func
 import os
 import csv
+import pandas as pd
 
 class SipmCalibration(AdvancedAnalyzer):
     """The class for SiPM calibration analysis
     """
-    def __init__(self, positions:List[str], channels:List[int], voltages:List[float], directory:str, metadata_dict:Dict, wf:bool, merge:bool, verbose:bool):
+    def __init__(self, positions:List[str], channels:List[int], voltages:List[float], directory:str, metadata_dict:Dict, script:str, merge:bool, verbose:bool):
         """SipmCalibration constructor.
 
         Args:
@@ -19,11 +20,11 @@ class SipmCalibration(AdvancedAnalyzer):
             voltages (List[float]): A list of voltages (e.g. [63,65,67,69,71])
             directory (str): Directory containing processed HDF5 files
             metadata_dict (Dict): Metadata used to specify the file names. Arranged into a nested dictionary.
-            wf (bool): Whether the file name ends with '_wf'
+            script (str): The name of the pre-processing script (without .py)
             merge (bool): Whether to merge different runs
             verbose (bool): Whether to print out more information
         """
-        super().__init__(directory, metadata_dict, wf, merge, verbose)
+        super().__init__(directory, metadata_dict, script, merge, verbose)
         self.positions = positions
         self.channels = channels
         self.voltages = voltages
@@ -335,6 +336,28 @@ class SipmCalibration(AdvancedAnalyzer):
                                 str(self.ap_charge[pos][ch][volt]['Qap_err'])]
                         row += [str(self.bsl_rms_thre[pos][ch][volt])]
                         w.writerow(row)
+                        
+    def write_to_h5(self, name:str):
+        h5filename = f'data/{name}.h5'
+        columns = ['channel', 'A1min', 'A1max', 'DiCT', 'DiCT_err', 'Qavg', 'Qavg_err', 'Qpeak', 'Qpeak_err', 'Qap', 'Qap_err', 'bsl_rms']
+        for pos in self.positions:
+            for volt in self.voltages:
+                store = pd.HDFStore(h5filename)
+                store.put(f'{pos}/{volt}V',pd.DataFrame(np.array([[
+                    ch,
+                    self.amp_hist[pos][ch][volt]['boundaries'][1],
+                    self.amp_hist[pos][ch][volt]['boundaries'][2],
+                    self.crosstalk[pos][ch][volt]['dict'],
+                    self.crosstalk[pos][ch][volt]['dict_err'],
+                    self.gain_avg_fits[pos][ch][volt]['Qavg'],
+                    self.gain_avg_fits[pos][ch][volt]['Qavg_err'],
+                    self.gain_peak_fits[pos][ch][volt]['Qpeak'],
+                    self.gain_peak_fits[pos][ch][volt]['Qpeak_err'],
+                    self.ap_charge[pos][ch][volt]['Qap'],
+                    self.ap_charge[pos][ch][volt]['Qap_err'],
+                    self.bsl_rms_thre[pos][ch][volt]
+                ] for ch in self.channels]), columns=columns).astype({'channel':'int'}))
+                store.close()
                         
     def calculate_renf(self):
         """Calculate reduced ENF. See calibration notebooks for more details.

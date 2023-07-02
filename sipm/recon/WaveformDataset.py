@@ -3,6 +3,7 @@ import sipm.recon.WaveformAnalyzer as wfa
 import glob
 import csv
 from datetime import datetime
+import pandas as pd
 
 class WaveformDataset: 
     def __init__(self,  path, pol=-1, channels=[0,1,2,3], samples=3000):
@@ -108,11 +109,15 @@ class WaveformDataset:
             print('No calibration csv file. Use default gain of 500.')
             self.gain = [500]*4
             pass
-    
+
+    def read_calibration_h5(self, filename):
+        self.calib_df = pd.read_hdf(filename, key=f'/{self.pos}/{self.volt}V')
+        self.calib_df['cn_corrected_gain'] = self.calib_df['Qpeak']*(1+self.calib_df['Qap'])/(1-self.calib_df['DiCT'])
+
     def get_total_pe(self):
         self.output['total_pe'] = np.zeros(self.ch[0].nevents)
         for ch in self.channels:
-            self.output['total_pe'] += np.array(self.ch[ch].output['integral_5p00us'])/self.gain[ch]
+            self.output['total_pe'] += np.array(self.ch[ch].output['integral_5p00us'])/self.calib_df['cn_corrected_gain'][ch]
 
     def get_fprompt(self):
         integral_long = np.zeros(self.ch[0].nevents)
@@ -163,7 +168,7 @@ class WaveformDataset:
             num_events (int, optional): Number of events. Defaults to 1e9.
             calib (str, optional): Directory that contains SiPM calibration results. Defaults to "".
         """
-        self.read_calibration(calib)
+        self.read_calibration_h5(calib)
         for i in self.channels:
             self.ch[i].read_data(header=header, num_events=num_events)
             self.ch[i].baseline_subtraction(samples=self.ch[i].trigger_position-int(0.5/self.ch[i].sample_step))
@@ -171,10 +176,10 @@ class WaveformDataset:
             self.ch[i].get_max(ar=True, trig=True) # AR matched filter, maximum near trigger position
             self.ch[i].get_integral() # full integral (from trigger-10 samples to end)
             # Make cut on filtered amplitude->SPE, baseline rms->pre-trigger pulses, and total integral->post-trigger scintillation pulses
-            cut = (np.array(self.ch[i].output['baseline_rms'])<self.bslrms[i]) & \
-                (np.array(self.ch[i].output['amplitude_trig'])<self.a1max[i]) & \
-                (np.array(self.ch[i].output['amplitude_trig'])>self.a1min[i]) & \
-                (np.array(self.ch[i].output['integral'])<6*self.gain[i])
+            cut = (np.array(self.ch[i].output['baseline_rms'])<self.calib_df['bsl_rms'][i]) & \
+                (np.array(self.ch[i].output['amplitude_trig'])<self.calib_df['A1max'][i]) & \
+                (np.array(self.ch[i].output['amplitude_trig'])>self.calib_df['A1min'][i]) & \
+                (np.array(self.ch[i].output['integral'])<6*self.calib_df['cn_corrected_gain'][i])
             # Store SPE average waveform and number of selected waveforms
             self.ch[i].output['n_spe_wfs'] = np.sum(cut)
             self.ch[i].output['avg_spe_wf'] = np.dot(self.ch[i].traces.T,cut)/self.ch[i].output['n_spe_wfs']
@@ -195,7 +200,7 @@ class WaveformDataset:
             num_events (int, optional): Number of events. Defaults to 1e9.
             calib (str, optional): Directory that contains SiPM calibration results. Defaults to "".
         """
-        self.read_calibration(calib)
+        self.read_calibration_h5(calib)
         for i in self.channels:
             self.ch[i].read_data(header=header, num_events=num_events)
             self.ch[i].baseline_subtraction(samples=self.ch[i].trigger_position-int(0.5/self.ch[i].sample_step))
@@ -214,7 +219,7 @@ class WaveformDataset:
             fprompt (list, optional): Range of f_prompt. Defaults to [0.1,0.6].
             pe (list, optional): Range of PEs. Defaults to [300,700].
         """
-        self.read_calibration(calib)
+        self.read_calibration_h5(calib)
         for i in self.channels:
             self.ch[i].read_data(header=header, num_events=num_events)
             self.ch[i].baseline_subtraction(samples=self.ch[i].trigger_position-int(0.5/self.ch[i].sample_step))
@@ -227,7 +232,7 @@ class WaveformDataset:
             (np.array(self.output['fprompt'])<fprompt[1]) & \
             (np.array(self.output['fprompt'])>fprompt[0])
         for i in self.channels:
-            cut = cut & (np.array(self.ch[i].output['baseline_rms'])<2.5)
+            cut = cut & (np.array(self.ch[i].output['baseline_rms'])<self.calib_df['bsl_rms'][i])
         # Store average LAr scintillation waveform and number of selected waveforms
         for i in self.channels:
             self.ch[i].output['n_scint_wfs'] = np.sum(cut)
