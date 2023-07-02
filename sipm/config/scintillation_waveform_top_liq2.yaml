@@ -4,7 +4,7 @@ script: sipm/exe/scintillation_waveform.py
 description: Pre-processing scintillation data (waveform shape, top tile) taken in November 2022 for Tyvek A59 measurements (Liquefaction 2)
 arguments:
   num_events: 100000
-  sipm_calib_dir: /home/as111/sipm-analysis/data/calibration_liq2/
+  calib_file: /home/as111/sipm-analysis/data/calibration_liq2.h5
   fprompt:
   - 0.1
   - 0.5

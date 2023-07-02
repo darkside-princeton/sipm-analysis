@@ -232,7 +232,7 @@ class WaveformDataset:
             (np.array(self.output['fprompt'])<fprompt[1]) & \
             (np.array(self.output['fprompt'])>fprompt[0])
         for i in self.channels:
-            cut = cut & (np.array(self.ch[i].output['baseline_rms'])<2.5)
+            cut = cut & (np.array(self.ch[i].output['baseline_rms'])<self.calib_df['bsl_rms'][i])
         # Store average LAr scintillation waveform and number of selected waveforms
         for i in self.channels:
             self.ch[i].output['n_scint_wfs'] = np.sum(cut)

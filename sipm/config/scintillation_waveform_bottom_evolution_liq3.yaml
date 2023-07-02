@@ -1,11 +1,15 @@
 files:
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2023-05-04/*pos_bottom*cond_gamma*/*/
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2023-05-05/*pos_bottom*cond_gamma*/*/
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2023-05-08/*pos_bottom*cond_gamma*/*/
+- /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2023-05-09/*pos_bottom*cond_gamma*/*/
 - /scratch/gpfs/GALBIATI/data/sipm/reflector_studies/2023-05-10/*pos_bottom*cond_gamma*/*/
 cpu_memory: 16
 script: sipm/exe/scintillation_waveform.py
 description: Pre-processing scintillation data (triplet lifetime evolution, bottom tile) taken in April-May 2023 for Tyvek I59 measurements (Liquefaction 3)
 arguments:
   num_events: 100000
-  sipm_calib_dir: /home/as111/sipm-analysis/data/calibration_liq3/
+  calib_file: /home/as111/sipm-analysis/data/calibration_liq3.h5
   fprompt:
   - 0
   - 1
