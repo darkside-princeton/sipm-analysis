@@ -6,14 +6,14 @@ import numpy as np
 parser = argparse.ArgumentParser("Princeton SiPM Analysis")
 parser.add_argument("-n", "--num_events", type=int, default=100000)
 parser.add_argument("-f", "--file_dir", type=str, default="")
-parser.add_argument("-s", '--sipm_calib_dir', type=str, default="")
+parser.add_argument("-s", '--calib_file', type=str, default="")
 args = parser.parse_args()
 
 def main():
     # Create new dataset object
     d = wfd.WaveformDataset(path=args.file_dir, samples=4000)
 
-    d.read_calibration(args.sipm_calib_dir)
+    d.read_calibration_h5(args.calib_file)
     for i in d.channels:
         d.ch[i].read_data(header=True, num_events=args.num_events)
         d.ch[i].baseline_subtraction(samples=d.ch[i].trigger_position-int(0.5/d.ch[i].sample_step))
@@ -21,13 +21,13 @@ def main():
         d.ch[i].get_max(ar=True, trig=True) # AR matched filter, maximum near trigger position
         d.ch[i].get_integral() # full integral (from trigger-10 samples to end)
         # Make cut on filtered amplitude->SPE, baseline rms->pre-trigger pulses, and total integral->post-trigger scintillation pulses
-        cut_1pe = (np.array(d.ch[i].output['baseline_rms'])<d.bslrms[i]) & \
-            (np.array(d.ch[i].output['amplitude_trig'])<d.a1max[i]) & \
-            (np.array(d.ch[i].output['amplitude_trig'])>d.a1min[i]) & \
-            (np.array(d.ch[i].output['integral'])<6*d.gain[i])
-        cut_0pe = (np.array(d.ch[i].output['baseline_rms'])<d.bslrms[i]) & \
-            (np.array(d.ch[i].output['amplitude_trig'])<d.a1min[i]) & \
-            (np.array(d.ch[i].output['integral'])<6*d.gain[i])
+        cut_1pe = (np.array(d.ch[i].output['baseline_rms'])<d.calib_df['bsl_rms'][i]) & \
+            (np.array(d.ch[i].output['amplitude_trig'])<d.calib_df['A1max'][i]) & \
+            (np.array(d.ch[i].output['amplitude_trig'])>d.calib_df['A1min'][i]) & \
+            (np.array(d.ch[i].output['integral'])<6*d.calib_df['cn_corrected_gain'][i])
+        cut_0pe = (np.array(d.ch[i].output['baseline_rms'])<d.calib_df['bsl_rms'][i]) & \
+            (np.array(d.ch[i].output['amplitude_trig'])<d.calib_df['A1min'][i]) & \
+            (np.array(d.ch[i].output['integral'])<6*d.calib_df['cn_corrected_gain'][i])
         d.ch[i].get_fft2()
         # Store 1PE power spectrum (|fft|^2)
         d.ch[i].output['n_1pe_wfs'] = np.sum(cut_1pe)
