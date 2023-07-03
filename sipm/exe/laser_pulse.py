@@ -18,7 +18,7 @@ def main():
     io = h5_io.IO(dataset=d)
 
     # Save data to HDF5
-    io.save()
+    io.save(script='laser_pulse')
 
 if __name__ == "__main__":
     main()

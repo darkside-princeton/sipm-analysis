@@ -124,7 +124,8 @@ class WaveformAnalyzer():
         arwfs = []
         for ev_ in ev:
             wfs.append(self.traces[ev_,:])
-            arwfs.append(self.ar_filtered_traces[ev_,:])
+            if ar_filter:
+                arwfs.append(self.ar_filtered_traces[ev_,:])
         self.clear()
         return wfs, arwfs
 
@@ -224,10 +225,19 @@ class WaveformAnalyzer():
             y = scipy.fft.fft(x)
             y = 2.0/self.samples * np.abs(y[1:self.samples//2])
             self.fft.append(y)
+    
+    def get_fft2(self):
+        self.fft2 = []
+        for ii,x in enumerate(self.traces):
+            y = abs(scipy.fft.fft(x))**2
+            self.fft2.append(y)
+        self.fft2 = np.array(self.fft2)
             
     def clear(self):
         self.traces = []
         self.ar_filtered_traces = []
+        self.fft = []
+        self.fft2 = []
 
     def calibrate(self,vals,width=6,prominence=2,verbose=-1,fitrange=10):
         self.fit_p = []
