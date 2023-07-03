@@ -27,6 +27,8 @@ class WaveformDataset:
         self.ch = self.InitializeChannels()
         
     def read_timestamp(self):
+        """Read the time information for the data file.
+        """
         format_str = '%Y/%m/%d %H:%M:%S'
         try:
             with open(f'{self.path}time.txt', 'r') as f:
@@ -63,56 +65,14 @@ class WaveformDataset:
         self.volt = int(self.path[id_volt[0]:id_volt[1]])
         return np.array(channels)
 
-    def read_calibration(self,calib_dir):
-        """Read calibration file to get SPE gain and SPE filtered amplitude range. The effective gain, taking into account DiCT and AP, is Q_peak*(1+Q_ap)/(1-p).
+    def read_calibration_h5(self, filename):
+        """Read calibration result HDF5 file. See the member function 'SipmCalibration::write_to_h5()' in SipmCalibration.py for an example to generate such a file.
 
         Args:
-            calib_dir (string): Directory of calibration csv files
+            filename (_type_): Full path of the file.
         """
-        self.gain = []
-        self.a1min = []
-        self.a1max = []
-        self.bslrms = []
-        calib_files = glob.glob(f'{calib_dir}*.csv')
-        i = 0
-        found = False
-        while i<len(calib_files) and not found:
-            ind = calib_files[i].find('V.csv')
-            if ind!=-1 and int(calib_files[i][ind-2:ind])==self.volt:
-                found = True
-            i += 1
-        if found:
-            print(f'Calibration csv file: {calib_files[i-1]}')
-            with open(calib_files[i-1]) as f:
-                r = csv.reader(f)
-                line_count = 0
-                for row in r:
-                    if line_count>0:
-                        if self.pos=='top':
-                            if line_count<=4:
-                                self.gain.append(float(row[7])*(1+float(row[9]))/(1-float(row[3])))
-                                self.a1min.append(float(row[1]))
-                                self.a1max.append(float(row[2]))
-                                self.bslrms.append(float(row[11]))
-                        elif self.pos=='bottom':
-                            if line_count>4:
-                                self.gain.append(float(row[7])*(1+float(row[9]))/(1-float(row[3])))
-                                self.a1min.append(float(row[1]))
-                                self.a1max.append(float(row[2]))
-                                self.bslrms.append(float(row[11]))
-                    line_count += 1
-            print(f'Gain of {self.pos} SiPMs @{self.volt}V: {self.gain[0]:.2f} {self.gain[1]:.2f} {self.gain[2]:.2f} {self.gain[3]:.2f}')
-            print(f'A1min of {self.pos} SiPMs @{self.volt}V: {self.a1min[0]:.2f} {self.a1min[1]:.2f} {self.a1min[2]:.2f} {self.a1min[3]:.2f}')
-            print(f'A1max of {self.pos} SiPMs @{self.volt}V: {self.a1max[0]:.2f} {self.a1max[1]:.2f} {self.a1max[2]:.2f} {self.a1max[3]:.2f}')
-            print(f'Baseline RMS threshold of {self.pos} SiPMs @{self.volt}V: {self.bslrms[0]:.2f} {self.bslrms[1]:.2f} {self.bslrms[2]:.2f} {self.bslrms[3]:.2f}')
-        else:
-            print('No calibration csv file. Use default gain of 500.')
-            self.gain = [500]*4
-            pass
-
-    def read_calibration_h5(self, filename):
         self.calib_df = pd.read_hdf(filename, key=f'/{self.pos}/{self.volt}V')
-        self.calib_df['cn_corrected_gain'] = self.calib_df['Qpeak']*(1+self.calib_df['Qap'])/(1-self.calib_df['DiCT'])
+        self.calib_df['cn_corrected_gain'] = self.calib_df['Qpeak']*(1+self.calib_df['Qap'])/(1-self.calib_df['DiCT']) # effective SPE gain corrected for correlated noises (DiCT and afterpulsing)
 
     def get_total_pe(self):
         self.output['total_pe'] = np.zeros(self.ch[0].nevents)

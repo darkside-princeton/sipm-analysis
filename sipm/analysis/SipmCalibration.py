@@ -308,36 +308,13 @@ class SipmCalibration(AdvancedAnalyzer):
                 self.results['ap_prob'][pos][ch]['ov_err'] = np.ones(self.results['ap_prob'][pos][ch]['ov'].shape[0])*self.results['vbd'][pos][ch]['vbd_sipm_err']
                 self.results['gain'][pos][ch]['ov'] = np.array(self.results['gain'][pos][ch]['bias'])/nsipms-self.results['vbd'][pos][ch]['vbd_sipm']
                 self.results['gain'][pos][ch]['ov_err'] = np.ones(self.results['gain'][pos][ch]['ov'].shape[0])*self.results['vbd'][pos][ch]['vbd_sipm_err']
-                
-    def write_to_csv(self, name:str):
-        """Write calibration results to csv files.
-
-        Args:
-            name (str): Folder will be 'data/{name}' and files will be '{name}_{volt}V.csv'
-        """
-        if not os.path.exists(f'data/{name}'):
-            os.makedirs(f'data/{name}')
-        for volt in self.voltages:
-            with open(f'data/{name}/{name}_{volt}V.csv', 'w') as f:
-                w = csv.writer(f)
-                w.writerow(['CH', 'A1min', 'A1max', 'p', 'p_err', 'Qavg', 'Qavg_err', 'Qpeak', 'Qpeak_err', 'Qap', 'Qap_err', 'bsl_rms'])
-                for pos in self.positions:
-                    for ch in self.channels:
-                        row = [f'{pos[0].upper()}{ch}']
-                        row += [str(self.amp_hist[pos][ch][volt]['boundaries'][1]),
-                                str(self.amp_hist[pos][ch][volt]['boundaries'][2])]
-                        row += [str(self.crosstalk[pos][ch][volt]['dict']),
-                                str(self.crosstalk[pos][ch][volt]['dict_err'])]
-                        row += [str(self.gain_avg_fits[pos][ch][volt]['Qavg']),
-                                str(self.gain_avg_fits[pos][ch][volt]['Qavg_err'])]
-                        row += [str(self.gain_peak_fits[pos][ch][volt]['Qpeak']),
-                                str(self.gain_peak_fits[pos][ch][volt]['Qpeak_err'])]
-                        row += [str(self.ap_charge[pos][ch][volt]['Qap']),
-                                str(self.ap_charge[pos][ch][volt]['Qap_err'])]
-                        row += [str(self.bsl_rms_thre[pos][ch][volt])]
-                        w.writerow(row)
                         
     def write_to_h5(self, name:str):
+        """Save calibration results and selection criteria for other pre-processing scripts as an HDF5 file under 'data/'. The keys are in the format of '/{pos}/{volt}V'.
+
+        Args:
+            name (str): HDF5 file name without .h5
+        """
         h5filename = f'data/{name}.h5'
         columns = ['channel', 'A1min', 'A1max', 'DiCT', 'DiCT_err', 'Qavg', 'Qavg_err', 'Qpeak', 'Qpeak_err', 'Qap', 'Qap_err', 'bsl_rms']
         for pos in self.positions:
