@@ -22,6 +22,12 @@ def main():
         d.ch[i].get_fft2()
         # Store 1PE power spectrum (|fft|^2)
         
+        cut_0pe = np.array()
+        j = 0
+        while j < 295:
+            cut_0pe.np.append(1)
+            j += 1
+
         d.ch[i].output['frequency_MHz'] = d.ch[i].time/d.ch[i].sample_step**2/d.ch[i].samples
         # Store 0PE power spectrum (|fft|^2)
         d.ch[i].output['n_0pe_wfs'] = np.sum(cut_0pe)
