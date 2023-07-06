@@ -4,4 +4,4 @@ script: sipm/exe/fft.py
 description: Pre-processing liquid nitrogen laser data taken in June 2023 for testing the PCB configuration (Liquefaction 4)
 arguments:
   num_events: 295
-  calib_file: /home/as111/sipm-analysis/data/calibration_liq4.h5
+  calib_file: /home/nwoofter/sipm-analysis/data/calibration_liq4.h5
