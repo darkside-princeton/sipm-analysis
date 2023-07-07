@@ -1,6 +1,6 @@
 files:
 - /scratch/gpfs/GALBIATI/data/sipm/hamamatsu_test/2023-06-07/*volt_6*/
-script: sipm/exe/fft.py
+script: sipm/exe/fft_below_breakdown.py
 description: Pre-processing liquid nitrogen laser data taken in June 2023 for testing the PCB configuration (Liquefaction 4)
 arguments:
   num_events: 295
