@@ -71,8 +71,9 @@ class WaveformDataset:
         Args:
             filename (_type_): Full path of the file.
         """
-        self.calib_df = pd.read_hdf(filename, key=f'/{self.pos}/{self.volt}V')
-        self.calib_df['cn_corrected_gain'] = self.calib_df['Qpeak']*(1+self.calib_df['Qap'])/(1-self.calib_df['DiCT']) # effective SPE gain corrected for correlated noises (DiCT and afterpulsing)
+        self.calib_df = pd.read_hdf(filename, key=f'/{self.volt}V')
+        if 'Qpeak' in self.calib_df and 'Qap' in self.calib_df and 'DiCT' in self.calib_df:
+            self.calib_df['cn_corrected_gain'] = self.calib_df['Qpeak']*(1+self.calib_df['Qap'])/(1-self.calib_df['DiCT']) # effective SPE gain corrected for correlated noises (DiCT and afterpulsing)
 
     def get_total_pe(self):
         self.output['total_pe'] = np.zeros(self.ch[0].nevents)
