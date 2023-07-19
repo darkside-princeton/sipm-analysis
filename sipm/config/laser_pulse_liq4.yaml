@@ -1,6 +1,6 @@
 files:
-- /scratch/gpfs/GALBIATI/data/sipm/hamamatsu_test/2023-06-07/*volt_6*/
+- /scratch/gpfs/GALBIATI/data/sipm/hamamatsu_test/2023-07-12/*volt_8*/
 script: sipm/exe/laser_pulse.py
-description: Pre-processing liquid nitrogen laser data taken in June 2023 for testing the PCB configuration (Liquefaction 4)
+description: Pre-processing liquid nitrogen laser data taken in July 2023 for testing the PCB configuration (Liquefaction 4)
 arguments:
-  num_events: 295
+  num_events: 20000
