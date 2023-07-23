@@ -1,6 +1,11 @@
 files:
-- /scratch/gpfs/GALBIATI/data/sipm/hamamatsu_test/2023-06-07/*volt_60*/
-num_events: 100000
+- /scratch/gpfs/GALBIATI/data/sipm/hamamatsu_test/2023-07-12/*volt_9*/0/
+- /scratch/gpfs/GALBIATI/data/sipm/hamamatsu_test/2023-07-12/*volt_9*/1/
+- /scratch/gpfs/GALBIATI/data/sipm/hamamatsu_test/2023-07-12/*volt_9*/2/
+- /scratch/gpfs/GALBIATI/data/sipm/hamamatsu_test/2023-07-12/*volt_9*/3/
+- /scratch/gpfs/GALBIATI/data/sipm/hamamatsu_test/2023-07-12/*volt_9*/4/
 calibration: /home/nwoofter/sipm-analysis/data/calibration_liq4/
 script: sipm/exe/laser_waveform_liq4.py
-description: Pre-processing liquid nitrogen laser data taken in June 2023 for testing the PCB configuration (Liquefaction 4)
+description: Pre-processing liquid nitrogen laser data taken in July 2023 for testing the PCB configuration (Liquefaction 4)
+arguments:
+  num_events: 20000
