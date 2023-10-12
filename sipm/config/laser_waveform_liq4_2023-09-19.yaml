@@ -1,0 +1,7 @@
+files:
+- /scratch/gpfs/GALBIATI/data/sipm/hamamatsu_test/2023-09-19/*cond_ln_intensity*/*/
+script: sipm/exe/laser_waveform_liq4.py
+description: Pre-processing laser calibration data (single photo-electron pulse shape) of hamamatsu SiPM tile taken in liquid nitrogen (Liquefaction 4)
+arguments:
+  num_events: 200000
+  calib_file: /home/as111/sipm-analysis/data/calibration_liq4_2023-09-19.h5
