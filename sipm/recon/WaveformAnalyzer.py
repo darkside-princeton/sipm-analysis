@@ -175,6 +175,7 @@ class WaveformAnalyzer():
             self.output['amplitude_trig'] = []
             self.output['peakpos_trig'] = []
             for ii,x in enumerate(traces):
+                self.trigger_position = max(self.trigger_position, 20) # avoid going negative for self.trigger_position-20
                 self.output['amplitude_trig'].append(np.max(x[self.trigger_position-20:self.trigger_position+20]))
                 self.output['peakpos_trig'].append(self.trigger_position-20+np.argmax(x[self.trigger_position-20:self.trigger_position+20]))
         else:
