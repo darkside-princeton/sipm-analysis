@@ -61,6 +61,9 @@ class WaveformDataset:
         if self.path.find('pos_')!=-1:
             id_pos = [self.path.find('pos_')+4, self.path.find('_',self.path.find('pos_')+4)]
             self.pos = self.path[id_pos[0]:id_pos[1]]
+        if  self.path.find('intensity_')!=-1:
+            id_intn = [self.path.find('intensity_')+10, self.path.find('/',self.path.find('intensity_')+10)]
+            self.intensity = self.path[id_intn[0]:id_intn[1]]
         id_volt = [self.path.find('volt_')+5, self.path.find('_',self.path.find('volt_')+5)]
         self.volt = int(self.path[id_volt[0]:id_volt[1]])
         return np.array(channels)
