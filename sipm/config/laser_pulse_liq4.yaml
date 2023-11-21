@@ -1,5 +1,5 @@
 files:
-- /scratch/gpfs/GALBIATI/data/sipm/hamamatsu_test/2023-10-25/*cond_ln_intensity*/*/
+- /scratch/gpfs/GALBIATI/data/sipm/hamamatsu_test/2023-11-08/**/*/
 script: sipm/exe/laser_pulse.py
 description: Pre-processing liquid nitrogen laser data taken for testing the PCB configuration (Liquefaction 4)
 arguments:
