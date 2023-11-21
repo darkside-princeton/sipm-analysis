@@ -16,4 +16,4 @@ dependencies:
   - scipy
   - h5py
   - pytables
-  - hdfview
+  - r-baseline
