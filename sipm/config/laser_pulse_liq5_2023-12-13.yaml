@@ -1,0 +1,7 @@
+files:
+- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2023-12-13/**/*/
+script: sipm/exe/laser_pulse_liq5.py
+description: Pre-processing laser data in pure liquid argon (Liquefaction 5 xenon doping studies)
+arguments:
+  num_events: 60000
+cpu_memory: 32
