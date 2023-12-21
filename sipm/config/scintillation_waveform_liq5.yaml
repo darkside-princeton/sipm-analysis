@@ -1,0 +1,16 @@
+files:
+- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2023-12-14/**/*/
+- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2023-12-18/**/*/
+- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2023-12-19/**/*/
+script: sipm/exe/scintillation_waveform_liq5.py
+description: Pre-processing scintillation data (waveform shape) taken in Dec 2023 for xenon doping measurements (Liquefaction 5)
+arguments:
+  num_events: 100000
+  calib_file: /home/as111/sipm-analysis/data/calibration_liq5_2023-12-13.h5
+  fprompt:
+  - 0.1
+  - 0.6
+  pe:
+  - 30
+  - 500
+cpu_memory: 32
