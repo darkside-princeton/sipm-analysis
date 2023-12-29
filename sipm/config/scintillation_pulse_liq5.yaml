@@ -1,7 +1,5 @@
 files:
-- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2023-12-14/**/*/
-- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2023-12-18/**/*/
-- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2023-12-19/**/*/
+- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2023-12-22/*source_none*/*/
 script: sipm/exe/scintillation_pulse_liq5.py
 description: Pre-processing scintillation data taken in Dec 2023 for xenon doping measurements (Liquefaction 5)
 arguments:
