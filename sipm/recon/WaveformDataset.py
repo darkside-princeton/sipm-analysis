@@ -82,15 +82,20 @@ class WaveformDataset:
         for ch in self.channels:
             self.output['total_pe'] += np.array(self.ch[ch].output['integral_5p00us'])/self.calib_df['cn_corrected_gain'][ch]
 
-    def get_fprompt(self):
+    def get_fprompt(self, tprompt=[0.5]):
         integral_long = np.zeros(self.ch[0].nevents)
         integral_short = np.zeros(self.ch[0].nevents)
-        for ch in self.channels:
-            integral_long += np.array(self.ch[ch].output['integral_5p00us'])
-            integral_short += np.array(self.ch[ch].output['integral_0p50us'])
-        self.output['fprompt'] = integral_short/integral_long
-        integral_long = None
-        integral_short = None
+        for tp in tprompt:
+            length_digits = str(int(tp*100))
+            while len(length_digits)<3:
+                length_digits = '0'+length_digits
+            name = f'{length_digits[:-2]}p{length_digits[-2:]}'
+            for ch in self.channels:
+                integral_long += np.array(self.ch[ch].output['integral_5p00us'])
+                integral_short += np.array(self.ch[ch].output[f'integral_{name}us'])
+            self.output[f'fprompt_{name}us'] = integral_short/integral_long
+            integral_long = np.zeros(self.ch[0].nevents)
+            integral_short = np.zeros(self.ch[0].nevents)
 
     def analyze(self, header=True, num_events=1e9, clear=True, sum=False):
         for i in self.channels:
