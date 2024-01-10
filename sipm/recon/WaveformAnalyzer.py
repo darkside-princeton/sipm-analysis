@@ -116,7 +116,7 @@ class WaveformAnalyzer():
             list, list: baseline-subtracted waveforms, ar-filtered waveforms
         """
         if self.traces==[]:
-            self.read_data()
+            self.read_data(num_events=np.max(ev)+1)
             self.baseline_subtraction()
             if ar_filter:
                 self.ar_filter(tau=20)

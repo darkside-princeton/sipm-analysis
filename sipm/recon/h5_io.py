@@ -108,6 +108,9 @@ class IO():
             print('keys: ',data.keys())
             
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
+            df['event'] = np.arange(df.shape[0])
+            df['run'] = int(self.run_number)
+            df.set_index(['run','event'], inplace=True)
             print('df=',df)
             store = pd.HDFStore(self.h5_filename)
             store.put(f"{self.metadata['volt']}/{i}", df, format='t', append=False, data_columns=True)
@@ -120,6 +123,9 @@ class IO():
             print('keys: ',data.keys())
             
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
+            df['event'] = np.arange(df.shape[0])
+            df['run'] = int(self.run_number)
+            df.set_index(['run','event'], inplace=True)
             print('df=',df)
 
             store = pd.HDFStore(self.h5_filename)
