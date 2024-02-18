@@ -1,0 +1,8 @@
+files:
+- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2024-02-16/**/*/
+script: sipm/exe/scintillation_pulse_liq6.py
+description: Pre-processing scintillation data taken in Feb 2024 for xenon doping measurements (Liquefaction 6)
+arguments:
+  num_events: 100000
+  calib_file: /home/as111/sipm-analysis/data/calibration_liq6_2023-12-13.h5
+cpu_memory: 32
