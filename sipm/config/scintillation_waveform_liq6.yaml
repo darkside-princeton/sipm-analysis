@@ -1,5 +1,6 @@
 files:
 - /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2024-02-16/**/*/
+- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2024-02-19/**/*/
 script: sipm/exe/scintillation_waveform_liq6.py
 description: Pre-processing scintillation data (waveform shape) taken in Feb 2024 for xenon doping measurements (Liquefaction 6)
 arguments:
@@ -10,5 +11,5 @@ arguments:
   - 0.6
   pe:
   - 50
-  - 200
+  - 600
 cpu_memory: 32
