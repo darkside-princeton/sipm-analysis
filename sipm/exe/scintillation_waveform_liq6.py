@@ -45,6 +45,7 @@ def main():
         d.ch[i].output.pop('integral_0p30us')
         d.ch[i].output.pop('integral_5p00us')
         d.ch[i].output.pop('amplitude')
+        d.ch[i].output.pop('peakpos')
     d.clear()
 
     # Create a IO objects to save the high level information
