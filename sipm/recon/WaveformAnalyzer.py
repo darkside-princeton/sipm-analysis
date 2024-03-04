@@ -66,6 +66,7 @@ class WaveformAnalyzer():
         print(f'{self.nevents} events')     
         self.time = np.arange(0,self.sample_step*self.samples,self.sample_step)
         self.trigger_position = np.argmax(self.pol*np.mean(self.traces, axis=0))
+        print('trigger_position:',self.trigger_position)
 
     def baseline_subtraction(self, samples=500):
         """Computes baseline mean and rms and subtracts baseline mean from raw waveform
