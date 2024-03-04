@@ -25,12 +25,16 @@ def main():
     d.get_total_pe()
     d.get_fprompt(tprompt=[0.3],channels=np.array([1,2,4,7]))
     # Make cut on total pe, fprompt, baseline rms of all the channels
-    cut = (np.array(d.output['total_pe'])<args.pe[1]) & \
-        (np.array(d.output['total_pe'])>args.pe[0]) & \
-        (np.array(d.output['fprompt_0p30us_1247'])<args.fprompt[1]) & \
-        (np.array(d.output['fprompt_0p30us_1247'])>args.fprompt[0])
+    cut = (np.array(d.output['total_pe'])<args.pe[1]) & (np.array(d.output['total_pe'])>args.pe[0])
+    print(f'total pe cut fraction: {1-np.sum(cut)/cut.shape[0]}')
+    cut = cut & (np.array(d.output['fprompt_0p30us_1247'])<args.fprompt[1]) & (np.array(d.output['fprompt_0p30us_1247'])>args.fprompt[0])
+    print(f' + fprompt cut fraction: {1-np.sum(cut)/cut.shape[0]}')
     for i in d.channels:
-        cut = cut & (np.array(d.ch[i].output['baseline_rms'])<d.calib_df['bsl_rms'][i]) & (np.array(d.ch[i].output['amplitude'])<d.calib_df['max_amp'][i])
+        cut = cut & (np.array(d.ch[i].output['amplitude'])<d.calib_df['max_amp'][i])
+        print(f' + saturation ch{i} cut fraction: {1-np.sum(cut)/cut.shape[0]}')
+    for i in [1,2,4,7]:
+        cut = cut & (np.array(d.ch[i].output['baseline_rms'])<d.calib_df['bsl_rms'][i])
+        print(f' + baseline rms ch{i} cut fraction: {1-np.sum(cut)/cut.shape[0]}')
     # Store average LAr scintillation waveform and number of selected waveforms
     for i in d.channels:
         d.ch[i].output['n_scint_wfs'] = np.sum(cut)
