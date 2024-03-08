@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import glob
 import scipy
+import yaml
 from BaselineRemoval import BaselineRemoval
 import sipm.util.functions as func
 
@@ -30,7 +31,11 @@ class WaveformAnalyzer():
         self.traces = []
         self.ar_filtered_traces = []
         self.timestamp = []
-        self.trigger_position = 0
+        daq = None
+        with open(self.path+'daq_config.yaml') as f:
+            daq = yaml.safe_load(f)
+        self.trigger_position = int(daq['COMMON']['RECORD_LENGTH']*(1-daq['COMMON']['POST_TRIGGER']/100.))
+        print('trigger_position:',self.trigger_position)
         self.nevents = 0
         self.output = {}
     
@@ -65,8 +70,6 @@ class WaveformAnalyzer():
         self.nevents = self.traces.shape[0]
         print(f'{self.nevents} events')     
         self.time = np.arange(0,self.sample_step*self.samples,self.sample_step)
-        self.trigger_position = np.argmax(self.pol*np.mean(self.traces, axis=0))
-        print('trigger_position:',self.trigger_position)
 
     def baseline_subtraction(self, samples=500):
         """Computes baseline mean and rms and subtracts baseline mean from raw waveform
