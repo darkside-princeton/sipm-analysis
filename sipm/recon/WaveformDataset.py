@@ -80,7 +80,7 @@ class WaveformDataset:
     def get_total_pe(self):
         self.output['total_pe'] = np.zeros(self.ch[0].nevents)
         for ch in self.channels:
-            self.output['total_pe'] += np.array(self.ch[ch].output['integral_5p00us'])/self.calib_df['cn_corrected_gain'][ch]
+            self.output['total_pe'] += np.array(self.ch[ch].output['integral_9p60us'])/self.calib_df['cn_corrected_gain'][ch]
 
     def get_fprompt(self, tprompt=[0.5], channels=np.arange(4)):
         integral_long = np.zeros(self.ch[0].nevents)
@@ -92,7 +92,7 @@ class WaveformDataset:
                 length_digits = '0'+length_digits
             name = f'{length_digits[:-2]}p{length_digits[-2:]}'
             for ch in channels:
-                integral_long += np.array(self.ch[ch].output['integral_5p00us'])
+                integral_long += np.array(self.ch[ch].output['integral_9p60us'])
                 integral_short += np.array(self.ch[ch].output[f'integral_{name}us'])
             self.output[f'fprompt_{name}us_{channels_str}'] = integral_short/integral_long
             integral_long = np.zeros(self.ch[0].nevents)
@@ -215,6 +215,7 @@ class WaveformDataset:
             self.ch[i].output.pop('baseline_rms')
             self.ch[i].output.pop('integral_0p50us')
             self.ch[i].output.pop('integral_5p00us')
+            self.ch[i].output.pop('integral_9p60us')
         self.clear()
 
     def sum_traces(self, clear=True):

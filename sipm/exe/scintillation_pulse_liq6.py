@@ -20,7 +20,7 @@ def main():
     for i in d.channels:
         d.ch[i].read_data(header=True, num_events=args.num_events)
         d.ch[i].baseline_subtraction(samples=d.ch[i].trigger_position-int(0.5/d.ch[i].sample_step))
-        d.ch[i].get_integral(length_us=[0.3,5]) # <=0.5us for Fprompt analysis
+        d.ch[i].get_integral(length_us=[0.3,5,9.6]) # <=0.5us for Fprompt analysis
         d.ch[i].output['fired'] = d.ch[i].output['integral_5p00us']>0.5*d.calib_df['cn_corrected_gain'][i]
         d.ch[i].get_max()
     d.output['nch'] = np.zeros_like(d.ch[0].output['fired'])
