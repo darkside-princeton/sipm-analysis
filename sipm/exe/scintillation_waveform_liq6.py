@@ -31,10 +31,7 @@ def main():
     print(f' + fprompt cut fraction: {1-np.sum(cut)/cut.shape[0]}')
     for i in d.channels:
         cut = cut & (np.array(d.ch[i].output['amplitude'])<d.calib_df['max_amp'][i])
-        print(f' + saturation ch{i} cut fraction: {1-np.sum(cut)/cut.shape[0]}')
-    for i in [1,2,4,7]:
         cut = cut & (np.array(d.ch[i].output['baseline_rms'])<d.calib_df['bsl_rms'][i])
-        print(f' + baseline rms ch{i} cut fraction: {1-np.sum(cut)/cut.shape[0]}')
     # Store average LAr scintillation waveform and number of selected waveforms
     for i in d.channels:
         d.ch[i].output['n_scint_wfs'] = np.sum(cut)
