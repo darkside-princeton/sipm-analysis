@@ -20,7 +20,7 @@ def main():
     for i in d.channels:
         d.ch[i].read_data(header=True, num_events=args.num_events)
         d.ch[i].baseline_subtraction(samples=d.ch[i].trigger_position-int(0.5/d.ch[i].sample_step))
-        d.ch[i].get_integral(length_us=[0.3,5]) # 0.3us for Fprompt analysis
+        d.ch[i].get_integral(length_us=[0.3,9.6]) # 0.3us for Fprompt analysis
         d.ch[i].get_max()
     d.get_total_pe()
     d.get_fprompt(tprompt=[0.3],channels=np.array([1,2,4,7]))
@@ -44,7 +44,7 @@ def main():
         d.ch[i].output.pop('baseline_mean')
         d.ch[i].output.pop('baseline_rms')
         d.ch[i].output.pop('integral_0p30us')
-        d.ch[i].output.pop('integral_5p00us')
+        d.ch[i].output.pop('integral_9p60us')
         d.ch[i].output.pop('amplitude')
         d.ch[i].output.pop('peakpos')
     d.clear()
