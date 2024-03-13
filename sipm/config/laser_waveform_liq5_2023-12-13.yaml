@@ -4,5 +4,5 @@ script: sipm/exe/laser_waveform_liq5.py
 description: Pre-processing laser calibration data (single photo-electron pulse shape) of hamamatsu SiPM tile taken in liquid argon (Liquefaction 5)
 arguments:
   num_events: 200000
-  calib_file: /home/as111/sipm-analysis/data/calibration_liq5_2023-12-13.h5
+  calib_file: /home/av6369/sipm-analysis/data/calibration_liq5_2023-12-13.h5
 cpu_memory: 32
