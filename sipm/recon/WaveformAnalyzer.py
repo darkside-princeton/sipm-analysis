@@ -31,10 +31,11 @@ class WaveformAnalyzer():
         self.traces = []
         self.ar_filtered_traces = []
         self.timestamp = []
-        daq = None
-        with open(self.path+'daq_config.yaml') as f:
-            daq = yaml.safe_load(f)
-        self.trigger_position = int(daq['COMMON']['RECORD_LENGTH']*(1-daq['COMMON']['POST_TRIGGER']/100.))
+        # daq = None
+        # with open(self.path+'daq_config.yaml') as f:
+        #     daq = yaml.safe_load(f)
+        # self.trigger_position = int(daq['COMMON']['RECORD_LENGTH']*(1-daq['COMMON']['POST_TRIGGER']/100.)) # this is from wavedump config, which is not precise
+        self.trigger_position = int(6220/4) # hard-coded for now
         print('trigger_position:',self.trigger_position)
         self.nevents = 0
         self.output = {}
