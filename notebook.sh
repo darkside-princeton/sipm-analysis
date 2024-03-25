@@ -2,7 +2,7 @@
 #SBATCH --partition physics
 #SBATCH --nodes 1
 #SBATCH --ntasks-per-node 1
-#SBATCH --mem-per-cpu 8G
+#SBATCH --mem-per-cpu 16G
 #SBATCH --time 4:00:00
 #SBATCH --job-name jupyter-notebook
 #SBATCH --output jupyter-notebook-%J.log
