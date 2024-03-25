@@ -1,7 +1,5 @@
 files:
-- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2024-03-12/*cond_monitor*/*/
-- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2024-03-18/*cond_monitor*/*/
-- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2024-03-19/**/*/
+- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2024-03-25/*source_na22*/*/
 script: sipm/exe/scintillation_pulse_liq6.py
 description: Pre-processing scintillation data taken in Feb 2024 for xenon doping measurements (Liquefaction 6)
 arguments:
