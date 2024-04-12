@@ -3,7 +3,6 @@ import numpy as np
 import glob
 import scipy
 import yaml
-from BaselineRemoval import BaselineRemoval
 import sipm.util.functions as func
 
 class WaveformAnalyzer():
@@ -217,13 +216,6 @@ class WaveformAnalyzer():
 
     def rolling_baseline(self):
         return 0
-    
-    def get_rolling_integral(self):
-        self.rolling_integral = []
-        for x in self.traces:
-            trace_corr = BaselineRemoval(x)
-            self.rolling_integral.append(np.sum(trace_corr.IModPoly(10)))
-        self.rolling_integral = np.array(self.rolling_integral)
 
     def get_fft(self):
         self.fft = []
