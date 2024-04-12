@@ -48,12 +48,13 @@ class IO():
         path : string
             The directory containing the waveform files.
         """
-        self.tag_list = ['volt', 'pos', 'light', 'coinc', 'cond', 'config', 'intensity']
+        self.tag_list = ['volt', 'pos', 'light', 'coinc', 'cond', 'config', 'intensity','source','xenon']
         tag_dict = {}
+        path_ = path.split('/')[-3]
         for tag in self.tag_list:
-            index = path.find(tag)
+            index = path_.find(tag)
             if index!=-1:
-                filename = path[index:].split('/')[0]
+                filename = path_[index:].split('/')[0]
                 indices_object = re.finditer(pattern='_', string=filename)
                 indices = [index.start() for index in indices_object]
                 if len(indices) < 2 or tag=='cond':#condition description can contain multiple words separated by _
@@ -108,6 +109,9 @@ class IO():
             print('keys: ',data.keys())
             
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
+            df['event'] = np.arange(df.shape[0])
+            df['run'] = int(self.run_number)
+            df.set_index(['run','event'], inplace=True)
             print('df=',df)
             store = pd.HDFStore(self.h5_filename)
             store.put(f"{self.metadata['volt']}/{i}", df, format='t', append=False, data_columns=True)
@@ -120,6 +124,9 @@ class IO():
             print('keys: ',data.keys())
             
             df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.items() ]))
+            df['event'] = np.arange(df.shape[0])
+            df['run'] = int(self.run_number)
+            df.set_index(['run','event'], inplace=True)
             print('df=',df)
 
             store = pd.HDFStore(self.h5_filename)

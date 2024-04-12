@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import glob
 import scipy
-from BaselineRemoval import BaselineRemoval
+import yaml
 import sipm.util.functions as func
 
 class WaveformAnalyzer():
@@ -30,7 +30,12 @@ class WaveformAnalyzer():
         self.traces = []
         self.ar_filtered_traces = []
         self.timestamp = []
-        self.trigger_position = 0
+        # daq = None
+        # with open(self.path+'daq_config.yaml') as f:
+        #     daq = yaml.safe_load(f)
+        # self.trigger_position = int(daq['COMMON']['RECORD_LENGTH']*(1-daq['COMMON']['POST_TRIGGER']/100.)) # this is from wavedump config, which is not precise
+        self.trigger_position = int(6220/4) # hard-coded for now
+        print('trigger_position:',self.trigger_position)
         self.nevents = 0
         self.output = {}
     
@@ -65,7 +70,6 @@ class WaveformAnalyzer():
         self.nevents = self.traces.shape[0]
         print(f'{self.nevents} events')     
         self.time = np.arange(0,self.sample_step*self.samples,self.sample_step)
-        self.trigger_position = np.argmax(self.pol*np.mean(self.traces, axis=0))
 
     def baseline_subtraction(self, samples=500):
         """Computes baseline mean and rms and subtracts baseline mean from raw waveform
@@ -116,7 +120,7 @@ class WaveformAnalyzer():
             list, list: baseline-subtracted waveforms, ar-filtered waveforms
         """
         if self.traces==[]:
-            self.read_data()
+            self.read_data(num_events=np.max(ev)+1)
             self.baseline_subtraction()
             if ar_filter:
                 self.ar_filter(tau=20)
@@ -212,13 +216,6 @@ class WaveformAnalyzer():
 
     def rolling_baseline(self):
         return 0
-    
-    def get_rolling_integral(self):
-        self.rolling_integral = []
-        for x in self.traces:
-            trace_corr = BaselineRemoval(x)
-            self.rolling_integral.append(np.sum(trace_corr.IModPoly(10)))
-        self.rolling_integral = np.array(self.rolling_integral)
 
     def get_fft(self):
         self.fft = []

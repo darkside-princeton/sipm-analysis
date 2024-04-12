@@ -139,4 +139,4 @@ settings.json
 !data/*/*.root
 *.err
 *.out
-calibration_liq4*.h5
+calibration_liq*.h5
