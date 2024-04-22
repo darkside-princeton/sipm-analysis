@@ -6,7 +6,7 @@ from datetime import datetime
 import pandas as pd
 
 class WaveformDataset: 
-    def __init__(self,  path, pol=-1, channels=[0,1,2,3], samples=3000):
+    def __init__(self,  path, pol=-1, channels=[0,1,2,3], samples=3000, trig=int(6220/4)):
         """Class that analyzes the waveform data. Contains a list of WaveformAnalyzer objects for all the channels in a SiPM array.
 
         Args:
@@ -14,12 +14,14 @@ class WaveformDataset:
             pol (int, optional): Polarity. Defaults to -1.
             channels (list, optional): A list of channel numbers. Defaults to [0,1,2,3].
             samples (int, optional): Length of acquisition window. Defaults to 3000.
+            trig (int, optional): Trigger position in sample #
         """
         self.datadir = "/scratch/gpfs/GALBIATI/data/sipm/"
         self.path = f"{self.datadir}/{path.replace(self.datadir, '')}"
         self.channels = channels
         self.samples = samples
         self.pol = pol
+        self.trigger = trig
         self.pos = ''
         self.volt = 0
         self.output = {}
@@ -55,7 +57,7 @@ class WaveformDataset:
     def InitializeChannels(self):
         channels = []
         for i in self.channels:
-            new_channel = wfa.WaveformAnalyzer(id=i, pol=self.pol, path=self.path, samples=self.samples)
+            new_channel = wfa.WaveformAnalyzer(id=i, pol=self.pol, path=self.path, samples=self.samples, trig=self.trigger)
             channels.append(new_channel)
         # Get position and voltage
         if self.path.find('pos_')!=-1:
@@ -77,22 +79,30 @@ class WaveformDataset:
         self.calib_df = pd.read_hdf(filename, key=f'/{self.pos}/{self.volt}V')
         self.calib_df['cn_corrected_gain'] = self.calib_df['Qavg']/(1-self.calib_df['DiCT']) # effective SPE gain corrected for correlated noises (DiCT and afterpulsing)
 
-    def get_total_pe(self):
+    def get_total_pe(self, length_us = 9.6):
+        length_digits = str(int(length_us*100))
+        while len(length_digits)<3:
+            length_digits = '0'+length_digits
+        name = f'integral_{length_digits[:-2]}p{length_digits[-2:]}us'
         self.output['total_pe'] = np.zeros(self.ch[0].nevents)
         for ch in self.channels:
-            self.output['total_pe'] += np.array(self.ch[ch].output['integral_9p60us'])/self.calib_df['cn_corrected_gain'][ch]
+            self.output['total_pe'] += np.array(self.ch[ch].output[name])/self.calib_df['cn_corrected_gain'][ch]
 
-    def get_fprompt(self, tprompt=[0.5], channels=np.arange(4)):
+    def get_fprompt(self, tprompt=[0.5], channels=np.arange(4), t_all=9.6):
         integral_long = np.zeros(self.ch[0].nevents)
         integral_short = np.zeros(self.ch[0].nevents)
         channels_str = ''.join(channels.astype(str))
+        t_all_digits = str(int(t_all*100))
+        while len(t_all_digits)<3:
+            t_all_digits = '0'+t_all_digits
+        t_all_name = f'integral_{t_all_digits[:-2]}p{t_all_digits[-2:]}us'
         for tp in tprompt:
             length_digits = str(int(tp*100))
             while len(length_digits)<3:
                 length_digits = '0'+length_digits
             name = f'{length_digits[:-2]}p{length_digits[-2:]}'
             for ch in channels:
-                integral_long += np.array(self.ch[ch].output['integral_9p60us'])
+                integral_long += np.array(self.ch[ch].output[t_all_name])
                 integral_short += np.array(self.ch[ch].output[f'integral_{name}us'])
             self.output[f'fprompt_{name}us_{channels_str}'] = integral_short/integral_long
             integral_long = np.zeros(self.ch[0].nevents)
