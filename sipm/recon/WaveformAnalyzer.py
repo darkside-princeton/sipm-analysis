@@ -6,7 +6,7 @@ import yaml
 import sipm.util.functions as func
 
 class WaveformAnalyzer():
-    def __init__(self, id, pol, path, samples):
+    def __init__(self, id, pol, path, samples, trig = int(6220/4)):
         """Class that analyzes the waveform data to obtain higher-level information.
 
         Args:
@@ -14,6 +14,7 @@ class WaveformAnalyzer():
             pol (int): Polarity
             path (str): Data folder path
             samples (int): Length of acquisition window
+            trig (int): Trigger position in sample #
         """
         self.path = path
         self.id = id
@@ -34,7 +35,7 @@ class WaveformAnalyzer():
         # with open(self.path+'daq_config.yaml') as f:
         #     daq = yaml.safe_load(f)
         # self.trigger_position = int(daq['COMMON']['RECORD_LENGTH']*(1-daq['COMMON']['POST_TRIGGER']/100.)) # this is from wavedump config, which is not precise
-        self.trigger_position = int(6220/4) # hard-coded for now
+        self.trigger_position = trig
         print('trigger_position:',self.trigger_position)
         self.nevents = 0
         self.output = {}
