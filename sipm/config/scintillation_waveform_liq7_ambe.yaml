@@ -1,13 +1,13 @@
 files:
-- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2024-05-08/*source_ambe_xenon_0_cond_neutron*/*/
+- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2024-05-14/*source_ambe_xenon_1_cond_neutron*/*/
 script: sipm/exe/scintillation_waveform_liq7.py
 description: Pre-processing scintillation data (waveform shape) taken in Apr 2024 for xenon doping measurements (Liquefaction 7)
 arguments:
   num_events: 100000
   calib_file: /home/as111/sipm-analysis/data/calibration_liq6_2023-12-13.h5
   fprompt:
-  - 0.55
-  - 0.85
+  - 0.45
+  - 0.8
   pe:
   - 15
   - 120
