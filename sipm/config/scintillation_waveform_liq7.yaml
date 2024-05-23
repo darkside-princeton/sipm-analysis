@@ -1,5 +1,6 @@
 files:
-- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2024-05-20/2024-05-20_volt_98_light_scintillation_source_na22_xenon_4_cond_monitor*/*/
+- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2024-05-21/2024-05-21_volt_98_light_scintillation_source_na22_xenon_4_cond_gamma*/*/
+- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2024-05-22/2024-05-22_volt_98_light_scintillation_source_na22_xenon_5_cond_monitor*/*/
 script: sipm/exe/scintillation_waveform_liq7.py
 description: Pre-processing scintillation data (waveform shape) taken in Apr 2024 for xenon doping measurements (Liquefaction 7)
 arguments:
