@@ -1,0 +1,9 @@
+files:
+- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2024-05-30/2024-05-30_volt_98_light_scintillation_source_na22_xenon_9_cond_gamma/*/
+- /scratch/gpfs/GALBIATI/data/sipm/xenon_doping/2024-05-30/2024-05-30_volt_98_light_scintillation_source_ambe_xenon_9_cond_neutron_2pe/*/
+script: sipm/exe/scintillation_pulse_liq7.py
+description: Pre-processing scintillation data taken in April-May 2024 for xenon doping measurements (Liquefaction 7)
+arguments:
+  num_events: 100000
+  calib_file: /home/as111/sipm-analysis/data/calibration_liq6_2023-12-13.h5
+cpu_memory: 32
