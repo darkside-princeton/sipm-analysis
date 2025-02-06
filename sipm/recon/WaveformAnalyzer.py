@@ -24,7 +24,7 @@ class WaveformAnalyzer():
         self.sample_step = 1./float(self.sampling)*1e6 # in us
         self.traces = []
         self.time = []
-        self.baseline_samples = 100
+        self.baseline_samples = int(trig*0.8)
         self.filt_pars = None
         self.samples = samples
         self.header = [0]*6

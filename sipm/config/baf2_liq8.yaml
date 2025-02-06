@@ -1,0 +1,9 @@
+files:
+- /scratch/gpfs/GALBIATI/data/sipm/xart_long_wf/2025-02-05/2025-02-05_volt_2500_light_baf2_source_na22_xenon_0_cond_180deg/*/
+- /scratch/gpfs/GALBIATI/data/sipm/xart_long_wf/2025-02-05/2025-02-05_volt_2500_light_baf2_source_na22_xenon_0_cond_90deg/*/
+script: sipm/exe/baf2_liq8.py
+description: Pre-processing BaF2 test data taken in Feb 2024 for XArT (Liquefaction 8)
+arguments:
+  num_events: 100000
+  calib_file: 
+cpu_memory: 32

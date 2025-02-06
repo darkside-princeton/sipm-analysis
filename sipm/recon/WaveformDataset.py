@@ -55,10 +55,9 @@ class WaveformDataset:
             print('No time.txt file')
  
     def InitializeChannels(self):
-        channels = []
+        channels = {}
         for i in self.channels:
-            new_channel = wfa.WaveformAnalyzer(id=i, pol=self.pol, path=self.path, samples=self.samples, trig=self.trigger)
-            channels.append(new_channel)
+            channels[i] = wfa.WaveformAnalyzer(id=i, pol=self.pol, path=self.path, samples=self.samples, trig=self.trigger)
         # Get position and voltage
         if self.path.find('pos_')!=-1:
             id_pos = [self.path.find('pos_')+4, self.path.find('_',self.path.find('pos_')+4)]
@@ -68,7 +67,7 @@ class WaveformDataset:
             self.intensity = self.path[id_intn[0]:id_intn[1]]
         id_volt = [self.path.find('volt_')+5, self.path.find('_',self.path.find('volt_')+5)]
         self.volt = int(self.path[id_volt[0]:id_volt[1]])
-        return np.array(channels)
+        return channels
 
     def read_calibration_h5(self, filename):
         """Read calibration result HDF5 file. See the member function 'SipmCalibration::write_to_h5()' in SipmCalibration.py for an example to generate such a file.
