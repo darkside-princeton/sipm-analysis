@@ -6,7 +6,7 @@ import yaml
 import sipm.util.functions as func
 
 class WaveformAnalyzer():
-    def __init__(self, id, pol, path, samples, trig = int(6220/4)):
+    def __init__(self, id, pol, path, samples=None, trig = int(6220/4)):
         """Class that analyzes the waveform data to obtain higher-level information.
 
         Args:
@@ -26,7 +26,12 @@ class WaveformAnalyzer():
         self.time = []
         self.baseline_samples = int(trig*0.8)
         self.filt_pars = None
-        self.samples = samples
+        if samples is not None:
+            self.samples = samples
+        else:
+            with open(self.path+'daq_config.yaml') as f:
+                daq = yaml.safe_load(f)
+            self.samples = int(daq['COMMON']['RECORD_LENGTH'])
         self.header = [0]*6
         self.traces = []
         self.ar_filtered_traces = []

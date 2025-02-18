@@ -27,6 +27,7 @@ class WaveformDataset:
         self.output = {}
         self.read_timestamp()
         self.ch = self.InitializeChannels()
+        self.nevents = 0
         
     def read_timestamp(self):
         """Read the time information for the data file.
@@ -83,13 +84,15 @@ class WaveformDataset:
         while len(length_digits)<3:
             length_digits = '0'+length_digits
         name = f'integral_{length_digits[:-2]}p{length_digits[-2:]}us'
-        self.output['total_pe'] = np.zeros(self.ch[0].nevents)
+        self.output['total_pe'] = np.zeros(self.ch[self.channels[0]].nevents)
+        print(self.output['total_pe'].shape)
         for ch in self.channels:
             self.output['total_pe'] += np.array(self.ch[ch].output[name])/self.calib_df['cn_corrected_gain'][ch]
 
     def get_fprompt(self, tprompt=[0.5], channels=np.arange(4), t_all=9.6):
-        integral_long = np.zeros(self.ch[0].nevents)
-        integral_short = np.zeros(self.ch[0].nevents)
+        channels = np.array(channels)
+        integral_long = np.zeros(self.ch[self.channels[0]].nevents)
+        integral_short = np.zeros(self.ch[self.channels[0]].nevents)
         channels_str = ''.join(channels.astype(str))
         t_all_digits = str(int(t_all*100))
         while len(t_all_digits)<3:
@@ -104,8 +107,8 @@ class WaveformDataset:
                 integral_long += np.array(self.ch[ch].output[t_all_name])
                 integral_short += np.array(self.ch[ch].output[f'integral_{name}us'])
             self.output[f'fprompt_{name}us_{channels_str}'] = integral_short/integral_long
-            integral_long = np.zeros(self.ch[0].nevents)
-            integral_short = np.zeros(self.ch[0].nevents)
+            integral_long = np.zeros(self.ch[self.channels[0]].nevents)
+            integral_short = np.zeros(self.ch[self.channels[0]].nevents)
 
     def analyze(self, header=True, num_events=1e9, clear=True, sum=False):
         for i in self.channels:
