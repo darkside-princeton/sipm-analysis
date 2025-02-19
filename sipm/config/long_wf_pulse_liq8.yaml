@@ -1,0 +1,9 @@
+files:
+- /scratch/gpfs/GALBIATI/data/sipm/xart_long_wf/2025-02-13/2025-02-13_volt_98_light_scintillation_source_na22_sipmcoinc_1_baf2volt_2050_2500_baf2thre_10_3_random_false_cond_long_wf/*/
+- /scratch/gpfs/GALBIATI/data/sipm/xart_long_wf/2025-02-14/2025-02-14_volt_98_light_scintillation_source_na22_sipmcoinc_1_baf2volt_2050_2500_baf2thre_10_3_random_true_cond_long_wf/*/
+script: sipm/exe/long_wf_pulse_liq8.py
+description: Pre-processing scintillation data taken in Feb-Mar 2025 for XArT long waveform measurements (Liquefaction 8)
+arguments:
+  num_events: 100000
+  calib_file: /scratch/gpfs/GALBIATI/calibration/calibration_liq6_2023-12-13.h5
+cpu_memory: 32

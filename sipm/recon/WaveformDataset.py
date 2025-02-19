@@ -79,14 +79,16 @@ class WaveformDataset:
         self.calib_df = pd.read_hdf(filename, key=f'/{self.pos}/{self.volt}V')
         self.calib_df['cn_corrected_gain'] = self.calib_df['Qavg']/(1-self.calib_df['DiCT']) # effective SPE gain corrected for correlated noises (DiCT and afterpulsing)
 
-    def get_total_pe(self, length_us = 9.6):
+    def get_total_pe(self, length_us = 9.6, channels=None):
         length_digits = str(int(length_us*100))
         while len(length_digits)<3:
             length_digits = '0'+length_digits
         name = f'integral_{length_digits[:-2]}p{length_digits[-2:]}us'
         self.output['total_pe'] = np.zeros(self.ch[self.channels[0]].nevents)
         print(self.output['total_pe'].shape)
-        for ch in self.channels:
+        if channels is None:
+            channels = self.channels
+        for ch in channels:
             self.output['total_pe'] += np.array(self.ch[ch].output[name])/self.calib_df['cn_corrected_gain'][ch]
 
     def get_fprompt(self, tprompt=[0.5], channels=np.arange(4), t_all=9.6):

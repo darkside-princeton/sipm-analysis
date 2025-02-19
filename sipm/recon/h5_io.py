@@ -48,7 +48,7 @@ class IO():
         path : string
             The directory containing the waveform files.
         """
-        self.tag_list = ['volt', 'pos', 'light', 'coinc', 'cond', 'config', 'intensity','source','xenon']
+        self.tag_list = ['volt', 'pos', 'light', 'coinc', 'cond', 'config', 'intensity','source','xenon','random']
         tag_dict = {}
         path_ = path.split('/')[-3]
         for tag in self.tag_list:
