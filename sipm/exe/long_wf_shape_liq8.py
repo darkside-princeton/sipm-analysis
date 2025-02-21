@@ -19,23 +19,25 @@ def main():
     d.read_calibration_h5(args.calib_file)
     for i in d.channels:
         d.ch[i].read_data(header=True, num_events=args.num_events)
-        d.ch[i].baseline_subtraction(samples=d.ch[i].trigger_position)
-        d.ch[i].get_max()
+        # d.ch[i].baseline_subtraction(samples=d.ch[i].trigger_position)
+        # d.ch[i].get_max()
     # Make cut on baseline rms of all the channels
-    for i in d.channels:
-        cut = (np.array(d.ch[i].output['amplitude'])<d.calib_df['max_amp'][i]) & (np.array(d.ch[i].output['baseline_rms'])<2.0)
-    print(f'pre-trigger cut fraction: {1-np.sum(cut)/cut.shape[0]}')
+    # for i in d.channels:
+        # cut = (np.array(d.ch[i].output['amplitude'])<d.calib_df['max_amp'][i]) & (np.array(d.ch[i].output['baseline_rms'])<2.0)
+    # print(f'pre-trigger cut fraction: {1-np.sum(cut)/cut.shape[0]}')
     # Store average LAr scintillation waveform and number of selected waveforms
     for i in d.channels:
-        d.ch[i].output['n_scint_wfs'] = np.sum(cut)
-        d.ch[i].output['avg_scint_wf'] = np.dot(d.ch[i].traces.T,cut)/d.ch[i].output['n_scint_wfs']
+        # d.ch[i].output['n_scint_wfs'] = np.sum(cut)
+        # d.ch[i].output['avg_scint_wf'] = np.dot(d.ch[i].traces.T,cut)/d.ch[i].output['n_scint_wfs']
+        d.ch[i].output['n_scint_wfs'] = d.ch[i].traces.shape[0]
+        d.ch[i].output['avg_scint_wf'] = np.mean(d.ch[i].traces, axis=0)
         d.ch[i].output['time'] = d.ch[i].time
     # Clean up unnecessary variables
-    for i in d.channels:
-        d.ch[i].output.pop('baseline_mean')
-        d.ch[i].output.pop('baseline_rms')
-        d.ch[i].output.pop('amplitude')
-        d.ch[i].output.pop('peakpos')
+    # for i in d.channels:
+        # d.ch[i].output.pop('baseline_mean')
+        # d.ch[i].output.pop('baseline_rms')
+        # d.ch[i].output.pop('amplitude')
+        # d.ch[i].output.pop('peakpos')
     d.clear()
 
     # Create a IO objects to save the high level information
