@@ -1,5 +1,5 @@
 files:
-- /scratch/gpfs/GALBIATI/data/sipm/xart_long_wf/2025-02-14/2025-02-14_volt_98_light_scintillation_source_na22_cond_monitor/*/
+- /scratch/gpfs/GALBIATI/data/sipm/xart_long_wf/2025-02-20/2025-02-20_volt_98_light_scintillation_source_na22_cond_monitor/*/
 script: sipm/exe/scintillation_waveform_liq8.py
 description: Pre-processing scintillation data (waveform shape) taken in Feb-Mar 2025 for XArT long waveform measurements (Liquefaction 8)
 arguments:
