@@ -20,7 +20,7 @@ class Scheduler():
         self.dirs = dirs
         self.username = pwd.getpwuid(os.getuid())[0]
         self.date = datetime.today().strftime('%Y-%m-%d_%H-%M-%S')
-        self.scratch = f"/scratch/gpfs/{self.username}/jobs/{self.date}"
+        self.scratch = f"/scratch/gpfs/GALBIATI/{self.username}/jobs/{self.date}"
         self.partition = "physics"
         self.nodes = 1 
         self.tasks_per_node = 1 
@@ -63,7 +63,6 @@ class Scheduler():
         """
         with open(f"{self.scratch}/job_{index}.sh", "w") as f:
             f.write("#!/bin/bash -l\n")
-            f.write(f"#SBATCH --partition {self.partition}\n")
             f.write(f"#SBATCH --nodes {self.nodes}\n")
             f.write(f"#SBATCH --ntasks-per-node {self.tasks_per_node}\n")
             f.write(f"#SBATCH --mem-per-cpu {self.cpu_memory}G\n")

@@ -10,7 +10,7 @@ args = parser.parse_args()
 
 def main():
     # Create new dataset object
-    d = wfd.WaveformDataset(path=args.file_dir, channels=np.arange(8), samples=4000)
+    d = wfd.WaveformDataset(path=args.file_dir, channels=np.arange(8), samples=4000, trig=1585)
 
     # Run pulse analysis on laser data
     d.process_laser_pulses(num_events=args.num_events)

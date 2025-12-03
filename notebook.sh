@@ -1,5 +1,4 @@
 #!/bin/bash -l
-#SBATCH --partition physics
 #SBATCH --nodes 1
 #SBATCH --ntasks-per-node 1
 #SBATCH --mem-per-cpu 16G

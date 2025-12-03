@@ -25,7 +25,7 @@ class IO():
         self.filename = self.d.path
         self.date = self.get_date(self.filename)
         self.username = pwd.getpwuid(os.getuid())[0]
-        self.scratch = f"/scratch/gpfs/{self.username}/results/{self.date}"
+        self.scratch = f"/scratch/gpfs/GALBIATI/{self.username}/results/{self.date}"
 
     def get_date(self, filename):
         """Extracts the date of data taking from the filepath.
