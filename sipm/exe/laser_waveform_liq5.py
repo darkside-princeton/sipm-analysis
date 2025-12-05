@@ -12,7 +12,7 @@ args = parser.parse_args()
 
 def main():
     # Create new dataset object
-    d = wfd.WaveformDataset(path=args.file_dir, samples=4000, channels=np.arange(8))
+    d = wfd.WaveformDataset(path=args.file_dir, samples=4000, channels=np.arange(8), trig=1585)
 
     # Run waveform shape analysis on laser data
     d.calib_df = pd.read_hdf(args.calib_file, key=f'{d.volt}V')

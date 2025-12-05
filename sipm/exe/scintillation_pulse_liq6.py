@@ -11,7 +11,7 @@ args = parser.parse_args()
 
 def main():
     # Create new dataset object
-    d = wfd.WaveformDataset(path=args.file_dir, samples=4000, channels=np.arange(8))
+    d = wfd.WaveformDataset(path=args.file_dir, samples=4000, channels=np.arange(8), trig=1555)
 
     # Run pulse analysis on scintillation data
 
