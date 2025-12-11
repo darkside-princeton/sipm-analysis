@@ -39,3 +39,18 @@ def compound_poisson(x,mu,p):
 def error_distance(df,sigma):
     return chi2.ppf(chi2.cdf(sigma**2,1),df)**0.5
 
+def downsample(input_t,input_wf,nsub):
+    ntot = int(input_t.shape[0]//nsub * nsub)
+    new_t, new_wf = np.zeros(ntot//nsub), np.zeros(ntot//nsub)
+    for i in range(nsub):
+        new_t += input_t[i:ntot:nsub]
+        new_wf += input_wf[i:ntot:nsub]
+    new_t /= nsub
+    new_wf /= nsub
+    return new_t, new_wf
+
+def ww_model(t,a,tau_ar,tau_arxe):
+    return a/(tau_arxe-tau_ar)*(np.exp(-t/tau_arxe)-np.exp(-t/tau_ar)) * 16e-3
+
+def ww_model2(t,a,tau_ar,tau_arxe,tau_xe):
+    return a/(tau_arxe*tau_xe - tau_ar*tau_xe)*( (np.exp(-t/tau_xe)-np.exp(-t/tau_arxe))/(tau_arxe**-1 - tau_xe**-1) - (np.exp(-t/tau_xe)-np.exp(-t/tau_ar))/(tau_ar**-1 - tau_xe**-1) ) * 16e-3

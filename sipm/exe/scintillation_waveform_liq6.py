@@ -29,6 +29,9 @@ def main():
     print(f'total pe cut fraction: {1-np.sum(cut)/cut.shape[0]}')
     cut = cut & (np.array(d.output['fprompt_0p30us_1247'])<args.fprompt[1]) & (np.array(d.output['fprompt_0p30us_1247'])>args.fprompt[0])
     print(f' + fprompt cut fraction: {1-np.sum(cut)/cut.shape[0]}')
+    max_wl_integral = np.array([d.ch[i].output['integral_0p30us'] for i in [1,2,4,7]]).max(axis=0) > 2000
+    print(f'select max wl integral > 2000: {np.sum(max_wl_integral)} out of {max_wl_integral.shape[0]}')
+    cut = cut & max_wl_integral
     for i in d.channels:
         cut = cut & (np.array(d.ch[i].output['amplitude'])<d.calib_df['max_amp'][i])
         cut = cut & (np.array(d.ch[i].output['baseline_rms'])<d.calib_df['bsl_rms'][i])
