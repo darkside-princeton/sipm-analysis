@@ -141,3 +141,4 @@ settings.json
 *.out
 calibration_liq*.h5
 tau_Xe*.h5
+tau_arxe*.h5
