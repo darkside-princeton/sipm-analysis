@@ -55,10 +55,9 @@ class WaveformDataset:
             print('No time.txt file')
  
     def InitializeChannels(self):
-        channels = []
+        channels = {}
         for i in self.channels:
-            new_channel = wfa.WaveformAnalyzer(id=i, pol=self.pol, path=self.path, samples=self.samples, trig=self.trigger)
-            channels.append(new_channel)
+            channels[i] = wfa.WaveformAnalyzer(id=i, pol=self.pol, path=self.path, samples=self.samples, trig=self.trigger)
         # Get position and voltage
         if self.path.find('pos_')!=-1:
             id_pos = [self.path.find('pos_')+4, self.path.find('_',self.path.find('pos_')+4)]
@@ -68,7 +67,7 @@ class WaveformDataset:
             self.intensity = self.path[id_intn[0]:id_intn[1]]
         id_volt = [self.path.find('volt_')+5, self.path.find('_',self.path.find('volt_')+5)]
         self.volt = int(self.path[id_volt[0]:id_volt[1]])
-        return np.array(channels)
+        return channels
 
     def read_calibration_h5(self, filename):
         """Read calibration result HDF5 file. See the member function 'SipmCalibration::write_to_h5()' in SipmCalibration.py for an example to generate such a file.
@@ -84,13 +83,13 @@ class WaveformDataset:
         while len(length_digits)<3:
             length_digits = '0'+length_digits
         name = f'integral_{length_digits[:-2]}p{length_digits[-2:]}us'
-        self.output['total_pe'] = np.zeros(self.ch[0].nevents)
+        self.output['total_pe'] = np.zeros(self.ch[self.channels[0]].nevents)
         for ch in self.channels:
             self.output['total_pe'] += np.array(self.ch[ch].output[name])/self.calib_df['cn_corrected_gain'][ch]
 
     def get_fprompt(self, tprompt=[0.5], channels=np.arange(4), t_all=9.6):
-        integral_long = np.zeros(self.ch[0].nevents)
-        integral_short = np.zeros(self.ch[0].nevents)
+        integral_long = np.zeros(self.ch[self.channels[0]].nevents)
+        integral_short = np.zeros(self.ch[self.channels[0]].nevents)
         channels_str = ''.join(channels.astype(str))
         t_all_digits = str(int(t_all*100))
         while len(t_all_digits)<3:
@@ -105,8 +104,8 @@ class WaveformDataset:
                 integral_long += np.array(self.ch[ch].output[t_all_name])
                 integral_short += np.array(self.ch[ch].output[f'integral_{name}us'])
             self.output[f'fprompt_{name}us_{channels_str}'] = integral_short/integral_long
-            integral_long = np.zeros(self.ch[0].nevents)
-            integral_short = np.zeros(self.ch[0].nevents)
+            integral_long = np.zeros(self.ch[self.channels[0]].nevents)
+            integral_short = np.zeros(self.ch[self.channels[0]].nevents)
 
     def analyze(self, header=True, num_events=1e9, clear=True, sum=False):
         for i in self.channels:
