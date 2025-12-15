@@ -54,3 +54,14 @@ def ww_model(t,a,tau_ar,tau_arxe):
 
 def ww_model2(t,a,tau_ar,tau_arxe,tau_xe):
     return a/(tau_arxe*tau_xe - tau_ar*tau_xe)*( (np.exp(-t/tau_xe)-np.exp(-t/tau_arxe))/(tau_arxe**-1 - tau_xe**-1) - (np.exp(-t/tau_xe)-np.exp(-t/tau_ar))/(tau_ar**-1 - tau_xe**-1) ) * 16e-3
+
+def wl_model(t,a1,a2,tau_ar,tau_arxe):
+    return a1/tau_ar*np.exp(-t/tau_ar)*16e-3 + ww_model(t,a2,tau_ar,tau_arxe)
+
+def wl_ww_model(x,t0,a1,a2,a,tau_ar,tau_arxe):
+	t = x[:,0].copy()
+	data_indices = x[:,1].astype(int) # 0=WL, 1=WW
+	y = x.copy()
+	y[data_indices==0,0] = wl_model(t[data_indices==0]-t0,a1,a2,tau_ar,tau_arxe)
+	y[data_indices==1,0] = ww_model(t[data_indices==1]-t0,a,tau_ar,tau_arxe)
+	return y[:,0]
