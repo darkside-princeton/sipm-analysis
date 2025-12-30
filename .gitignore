@@ -142,3 +142,5 @@ settings.json
 calibration_liq*.h5
 tau_Xe*.h5
 tau_arxe*.h5
+*.npz
+*.csv
